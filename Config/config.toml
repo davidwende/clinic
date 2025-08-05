@@ -1,0 +1,90 @@
+[users]
+osnat = '706c1fb32bfd2c3506aa57216b0b32ec7c7c27c19c743ddeef74c6a750d0956b'
+david = "e2a962726204b69e65ad3530bd2e4c8fc9540b3535e388bd9be978aedd881608"
+michelle = "480913a0598751f416763e2766595b2b52bb006e97d39dffa26fece9e27c82cd"
+
+[host]
+ip = "18.197.224.100"
+
+[connection]
+#type = "sqlite"
+type = "mysql"
+create = "no"
+#create = "yes"
+
+[reports]
+save_path = "/home/dwende/reports"
+printer = "file"
+#printer = "printer"
+
+[header]
+header = """
+    <html
+    lang = "he">
+    <head>
+    <meta
+    charset = "UTF-8" >
+    <title > Patient Summary </title>
+
+<style>
+  .body {
+    margin: 10;
+    padding: 10;
+  }
+      .heb
+    {
+    direction: rtl;
+    }
+</style>
+
+</head>
+
+</style>
+<body class = "body">
+<table>
+  <tr>
+    <td>
+ Dr Osnat Wende
+    <br>
+    Specialist in Pain Relief Medicine
+    <br>
+    Medical License: 18558
+    <br>
+    Specialist Reg.: 14249
+    <br>
+    Area of interest: Musculoskeletal Medicine
+    <br>
+    44 Choshen St., Mevaseret Zion
+    <br>
+    053-431-5551
+    </td>
+    <td><img src="file:///home/dwende/clinic/logo_small.png"></td>
+    <td dir="rtl">
+
+דר אסנת וונדי
+<br>
+מומחית לשיכוך כאב
+<br>
+מ.ר. 18558
+<br>
+מ.ת.מ. 14249
+<br>
+תחום ענין: רפואת שריר שלד
+ <br>
+רח" החושן 44, מבשרת ציון
+<br>
+053-431-5551
+    </td>
+
+  </tr>
+</table>
+"""
+
+tail = """</div>
+<div style="text-align: center;">
+  <img src="file:///home/dwende/clinic/signature.jpg" alt="Image" width="300" height="106">
+</div>
+
+</body>
+</html>"""
+

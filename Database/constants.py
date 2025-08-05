@@ -1,0 +1,3 @@
+ERR_OK = 0
+ERR_EXISTS = 1
+

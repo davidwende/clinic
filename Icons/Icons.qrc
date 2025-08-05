@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="Buttons">
+    <file>delete-button.png</file>
+    <file>check.png</file>
+    <file>login.png</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>w_past_history</class>
+ <widget class="QWidget" name="w_past_history">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>851</width>
+    <height>802</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="1" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Past History</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="cb_disabilities">
+        <property name="text">
+         <string>Disabilities</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="lb_patient">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="le_malignancy_details"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="cb_malignancies">
+        <property name="text">
+         <string>Malignancies</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QLineEdit" name="le_blood"/>
+      </item>
+      <item row="7" column="1" rowspan="4">
+       <widget class="QListView" name="lv_nac"/>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLineEdit" name="le_nac"/>
+      </item>
+      <item row="14" column="2">
+       <widget class="QPushButton" name="pb_del_ac">
+        <property name="text">
+         <string>Delete AC Medication</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="cb_hypertension">
+          <property name="text">
+           <string>Hypertension</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cb_diabetes">
+          <property name="text">
+           <string>Diabetes</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="cb_remission">
+        <property name="text">
+         <string>Malignancy in Remission?</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="2">
+       <widget class="QPushButton" name="pb_add_ac">
+        <property name="text">
+         <string>Add AC Medication</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="le_malignancy_date"/>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QLineEdit" name="le_disabilities"/>
+      </item>
+      <item row="7" column="2">
+       <widget class="QComboBox" name="cb_nac"/>
+      </item>
+      <item row="16" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Trauma</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="2">
+       <widget class="QLineEdit" name="le_ac"/>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Medications NAC</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1" rowspan="4">
+       <widget class="QListView" name="lv_ac"/>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Operations</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="cb_blood">
+        <property name="text">
+         <string>Blood Disorders</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Medications AC</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QPushButton" name="pb_add_nac">
+        <property name="text">
+         <string>Add NAC Medication</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Details</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Year of Onset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="2">
+       <widget class="QPushButton" name="pb_del_nac">
+        <property name="text">
+         <string>Delete NAC Medication</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="2">
+       <widget class="QComboBox" name="cb_ac"/>
+      </item>
+      <item row="15" column="1" colspan="2">
+       <widget class="QPlainTextEdit" name="plt_operations"/>
+      </item>
+      <item row="16" column="1" colspan="2">
+       <widget class="QPlainTextEdit" name="plt_trauma"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="pb_save">
+     <property name="text">
+      <string>Save</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pb_cancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
