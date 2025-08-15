@@ -13,7 +13,8 @@ from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QSortFilterProxyModel
 from PySide6 import QtGui as qtg
 from Database.dbFuncs import get_all_patients, get_patient_by_id,\
-    patient_exists, save_new_patient, modify_patient, num_visits, delete_patient
+    patient_exists, save_new_patient, modify_patient, num_visits, delete_patient,\
+    visits_between_dates, visits_with_procedures_between_dates
 
 from Application_Main.UI.main_form import Ui_w_MainWindow
 from Application_Login.Login import LoginForm
@@ -229,7 +230,15 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         # self.lv_model.layoutAboutToBeChanged.emit()
         # self.lv_model.layoutChanged.emit()
         self.le_total_pat.setText(str(self.lv_model.rowCount()))
-        # print("Emitted ===>")
+        toDate = self.de_to_date.date().toPython()
+        fromDate = self.de_from_date.date().toPython()
+
+        print("Emitted ===>", toDate, fromDate)
+        vbd = visits_between_dates(fromDate, toDate)
+        pbd = visits_with_procedures_between_dates(fromDate, toDate)
+        print(vbd, pbd)
+        self.le_total_procedures.setText(str(pbd))
+        self.le_total_visits.setText(str(vbd))
 
     def clear_data(self):
         self.le_surname.setText('')

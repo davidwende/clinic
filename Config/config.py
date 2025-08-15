@@ -1,11 +1,15 @@
-import tomllib
+# import tomllib
+import tomli
+
 import sys
 if 'linux' == sys.platform:
     with open("./Config/config.toml", "rb") as f:
-        data = tomllib.load(f)
+        # data = tomllib.load(f)
+        data = tomli.load(f)
 else:
     with open("./Config/config.toml", "rb") as f:
-        data = tomllib.load(f)
+        # data = tomllib.load(f)
+        data = tomli.load(f)
 
 
 users = data['users']

@@ -1,6 +1,5 @@
-from pony.orm import select, flush, count, delete
-# from pony.orm import exists, delete, count
-# from datetime import date  # Import the datetime module
+from pony.orm import select, flush, count, delete, exists
+from datetime import date  # Import the datetime module
 from Database.dbCreate import PatientCore, PastHistory,\
     Nac, Ac, db_session, Visits, Procedures, BloodPulse, Diagnoses
 from PySide6.QtCore import QDate
@@ -17,7 +16,11 @@ def get_patient_by_id(tz):
     print("Type is : ", type(tz), len(tz))
     # pp = select((len(p.visits), p.tz, p.fname, p.surname ) for p in PatientCore if (tz == p.tz))[:][0]
     # print(pp[1], type(pp[1]), len(pp[1]))
-    return select( (p.dob, p.male, p.email, p.phone_number, p.smoking, p.consent ) for p in PatientCore if p.tz == tz)[:][0]
+    p = PatientCore[tz]
+    print(p)
+    return p.dob,p.male, p.email, p.phone_number, p.smoking, p.consent
+    # res = select( (p.dob, p.male, p.email, p.phone_number, p.smoking, p.consent ) for p in PatientCore if p.tz == tz)[:][0]
+    # return res
 
 @db_session
 def save_new_patient(tz, fname, surname, email, phone, smoker, dob, male, consent):
@@ -513,3 +516,17 @@ def delete_visit(tz, date):
         return error_codes.ERR_OK
     else:
         return error_codes.ERR_BAD
+
+
+@db_session
+def visits_between_dates(start_date, end_date):
+    return count(v for v in Visits if v.visit_date >= start_date
+                 and v.visit_date <= end_date)
+
+
+@db_session
+def visits_with_procedures_between_dates(start_date, end_date):
+    return count(v for v in Visits if v.visit_date >= start_date
+                 and v.visit_date <= end_date
+                 and exists(proc for proc in v.procedures))
+#
