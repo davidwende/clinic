@@ -58,6 +58,7 @@ class uiVisitForm(QMainWindow):
         layHorizontalPatient.addWidget(self.cb_date)
 
         self.pb_cc = QPushButton("Current Complaint", self)
+        # self.pb_cc = QPushButton("Current Complaint", self)
         self.pb_cc.setAutoFillBackground(True)
         self.pb_neck = QPushButton("Neck")
         self.pb_shoulder = QPushButton("Shoulder")
@@ -1299,12 +1300,14 @@ def allClear(widgets, active):
             background-color: limegreen;
             border: 2px solid gray;
             border-radius: 10px;
+            color: black;
             """)
         else:
             w.setStyleSheet("""
-            background-color: yellow;
+            background-color: lightgrey;
             border: 2px solid gray;
             border-radius: 10px;
+            color: black;
             """)
 
 if __name__ == "__main__":
