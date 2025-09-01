@@ -8,11 +8,13 @@ class HoverButton(QPushButton):
             background-color: lightgray;
             border: 2px solid gray;
             border-radius: 10px;
+            color: black;
         """
         self.hoverStyleSheet = """
-            background-color: green;
+            background-color: limegreen;
             border: 2px solid gray;
             border-radius: 10px;
+            color: blue;
         """
         self.setStyleSheet(self.defaultStyleSheet)
 
@@ -31,11 +33,13 @@ class HoverButtonVisit(QPushButton):
             background-color: lightgray;
             border: 2px solid gray;
             border-radius: 10px;
+            color: black;
         """
         self.hoverStyleSheet = """
             background-color: green;
             border: 2px solid gray;
             border-radius: 10px;
+            color: blue;
         """
         self.setStyleSheet(self.defaultStyleSheet)
 
