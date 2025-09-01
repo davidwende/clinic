@@ -33,7 +33,9 @@ pattern = r'^[\w\.-]+@[a-zA-Z\d-]+\.[a-zA-Z]{2,}$'
 
 font = qtg.QFont()
 font.setStyleHint(qtg.QFont.TypeWriter)
-font.setFamily('monospace')
+font.setPointSize(10)
+font.setFamily('DejaVue Sans')
+# font.setFamily('monospace')
 class ListViewModel(qtc.QAbstractListModel):
     def __init__(self, the_list = None):
         super().__init__()
@@ -104,9 +106,11 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
                 background-color: lightgray;
                 border: 2px solid gray;
                 border-radius: 10px;
+                color: black;
             }
             QPushButton:hover {
                 background-color: lightgreen;
+                color: black;
             }
         """)
         self.pb_save_new.setStyleSheet(button_style)
@@ -307,6 +311,10 @@ def check_good_email(email):
 
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
+
+    # Apply the font defined at the top of this file to the whole app.
+    # You can change the family/size above, e.g., font.setFamily("DejaVu Sans"); font.setPointSize(10)
+    app.setFont(font)
 
     window = MainWindow()
 

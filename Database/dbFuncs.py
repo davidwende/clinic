@@ -495,7 +495,13 @@ def add_blood_to_db(tz, visit_date, time, pulse, systolic, diastolic):
 @db_session
 def get_visit_dates(tz):
     p = PatientCore[tz]
+    # print(p.fname)
+    # print(p.dob)
     return select(v.visit_date for v in Visits if v.patient == p).order_by(1)[:]
+    # dd = select(v.visit_date for v in Visits if v.patient == p)
+    # print(dd)
+    # return []
+    # return select(v.visit_date for v in Visits if v.patient == p).order_by(1)[:]
 
 @db_session
 def get_visit(tz, date):
@@ -522,11 +528,12 @@ def delete_visit(tz, date):
 def visits_between_dates(start_date, end_date):
     return count(v for v in Visits if v.visit_date >= start_date
                  and v.visit_date <= end_date)
-
+    # return 0
 
 @db_session
 def visits_with_procedures_between_dates(start_date, end_date):
     return count(v for v in Visits if v.visit_date >= start_date
                  and v.visit_date <= end_date
                  and exists(proc for proc in v.procedures))
+    # return 0
 #
