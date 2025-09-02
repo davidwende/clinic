@@ -58,7 +58,7 @@ header = """
     <br>
     053-431-5551
     </td>
-    <td><img src="file:///home/dwende/clinic/logo_small.png"></td>
+    <td><img src="file:///home/dwende/repo/clinic/logo_small.png"></td>
     <td dir="rtl">
 
 דר אסנת וונדי
@@ -82,7 +82,7 @@ header = """
 
 tail = """</div>
 <div style="text-align: center;">
-  <img src="file:///home/dwende/clinic/signature.jpg" alt="Image" width="300" height="106">
+  <img src="file:///home/dwende/repo/clinic/signature.jpg" alt="Image" width="300" height="106">
 </div>
 
 </body>
