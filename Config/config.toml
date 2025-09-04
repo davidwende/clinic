@@ -82,7 +82,7 @@ header = """
 
 tail = """</div>
 <div style="text-align: center;">
-  <img src="file:///home/dwende/repo/clinic/signature.jpg" alt="Image" width="300" height="106">
+  <img src="file:///home/dwende/repo/clinic/signature_stamp.png" alt="Image" width="300" height="106">
 </div>
 
 </body>
