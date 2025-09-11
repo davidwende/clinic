@@ -1109,12 +1109,15 @@ class uiVisitForm(QMainWindow):
         laydiag_buttons = QVBoxLayout()
         self.lv_diag = CustomListView()
         self.lv_diag.setFixedWidth(WIDTH)
-        self.cmb_diag = QComboBox()
-        self.cmb_diag.setEditable(False)
-        self.cmb_diag.setFixedWidth(WIDTH)
+
+        self.lv_diag_list = QListView()
+        self.lv_diag_list.setFixedWidth(WIDTH)
 
         self.le_diag = QLineEdit()
         self.le_diag.setFixedWidth(WIDTH)
+
+        self.le_diag_filter = QLineEdit()
+        self.le_diag_filter.setFixedWidth(WIDTH)
 
         self.pb_diag_add = QPushButton("Add Diagnosis")
         self.pb_diag_add.setFixedWidth(WIDTH)
@@ -1132,7 +1135,9 @@ class uiVisitForm(QMainWindow):
 
 
 
-        laydiag_buttons.addWidget(self.cmb_diag)
+        # laydiag_buttons.addWidget(self.cmb_diag)
+        laydiag_buttons.addWidget(self.lv_diag_list)
+        laydiag_buttons.addWidget(self.le_diag_filter)
         laydiag_buttons.addWidget(self.le_diag)
         laydiag_buttons.addWidget(self.pb_diag_add)
         laydiag_buttons.addWidget(self.pb_diag_del)
@@ -1186,13 +1191,20 @@ class uiVisitForm(QMainWindow):
         self.lv_proc = CustomListView()
         self.lv_proc.setFixedWidth(WIDTH)
         # self.cmb_proc.setSizePolicy(sizePolicy)
+
         self.cmb_proc = QComboBox()
         self.cmb_proc.setEditable(False)
         # self.cmb_proc.setInsertPolicy(QComboBox.InsertAlphabetically)
         self.cmb_proc.setFixedWidth(WIDTH)
 
+        self.lv_proc_list = QListView()
+        self.lv_proc_list.setFixedWidth(WIDTH)
+
         self.le_proc = QLineEdit()
         self.le_proc.setFixedWidth(WIDTH)
+
+        self.le_proc_filter = QLineEdit()
+        self.le_proc_filter.setFixedWidth(WIDTH)
 
         # self.cmb_proc.addItems(["Needling", "Head Amputation", "Prolotherapy"])
         self.pb_proc_add = QPushButton("Add")
@@ -1209,7 +1221,9 @@ class uiVisitForm(QMainWindow):
         self.pb_proc_add_details = QPushButton("Add Procedure Details")
         self.pb_proc_add_details.setFixedWidth(WIDTH)
 
-        layproc_buttons.addWidget(self.cmb_proc)
+        # layproc_buttons.addWidget(self.cmb_proc)
+        layproc_buttons.addWidget(self.lv_proc_list)
+        layproc_buttons.addWidget(self.le_proc_filter)
         layproc_buttons.addWidget(self.le_proc)
         layproc_buttons.addWidget(self.pb_proc_add)
         layproc_buttons.addWidget(self.pb_proc_del)

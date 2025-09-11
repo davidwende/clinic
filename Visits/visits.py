@@ -52,7 +52,6 @@ class VisitForm(uiVisitForm):
         self.print_content = ""
         self.lb_patient.setStyleSheet("border :2px solid black;")
         self.lb_patient.setText("Patient: {}   {} {}".format(self.tz, self.fname, self.surname))
-        # self.le_patient.setEnabled(False)
         self.visit_date = None
         self.selected_diagnosis = None
         self.selected_procedure = None
@@ -62,15 +61,28 @@ class VisitForm(uiVisitForm):
         self.lv_model_proc = ListViewModel()
         self.lv_proc.setModel(self.lv_model_proc)
         # Setup model for combo box of procedures
-        self.cmb_proc_model = ListViewModel()
-        self.cmb_proc.setModel(self.cmb_proc_model)
+        # self.cmb_proc_model = ListViewModel()
+        # self.cmb_proc.setModel(self.cmb_proc_model)
+
+        self.lv_model_proc_list = ListViewModel()
+        self.lv_proc_list.setModel(self.lv_model_proc_list)
+
 
         # Setup model for list view of diagnoses
         self.lv_model_diag = ListViewModel()
         self.lv_diag.setModel(self.lv_model_diag)
-        # Setup model for combo box of diagnoses
-        self.cmb_diag_model = ListViewModel()
-        self.cmb_diag.setModel(self.cmb_diag_model)
+
+        self.lv_model_diag_list = ListViewModel()
+        self.lv_diag_list.setModel(self.lv_model_diag_list)
+
+
+        # Store original entries for filtering
+        self.original_diag_entries = []
+        self.original_proc_entries = []
+
+        # Connect filter line edit
+        self.le_diag_filter.textChanged.connect(self.filter_diagnoses)
+        self.le_proc_filter.textChanged.connect(self.filter_procedures)
 
         self.today = datetime.date.today().strftime("%Y %m %d")
 
@@ -80,12 +92,14 @@ class VisitForm(uiVisitForm):
         self.populate_diagnoses()
         self.s = ""
 
-        self.cmb_proc.textActivated.connect(lambda text : self.le_proc.setText(text))
+        # self.cmb_proc.textActivated.connect(lambda text : self.le_proc.setText(text))
+        self.lv_proc_list.clicked.connect(lambda index: self.le_proc.setText(index.data()))
+
         self.pb_proc_add.clicked.connect(self.add_procedure)
         self.pb_proc_del.clicked.connect(self.delete_procedure)
         self.pb_proc_add_details.clicked.connect(self.add_procedure_details)
 
-        self.cmb_diag.textActivated.connect(lambda text : self.le_diag.setText(text))
+        self.lv_diag_list.clicked.connect(lambda index: self.le_diag.setText(index.data()))
         self.pb_diag_add.clicked.connect(self.add_diagnosis)
         self.pb_diag_del.clicked.connect(self.delete_diagnosis)
         self.pb_diag_add_details.clicked.connect(self.add_diagnosis_details)
@@ -94,7 +108,6 @@ class VisitForm(uiVisitForm):
         self.pb_save.clicked.connect(lambda : self.save_new_visit(self.pb_save))
         self.pb_clear.clicked.connect(self.clear_visit_form)
         self.pb_review.clicked.connect(self.review_summary)
-        # self.pb_print_preview.clicked.connect(self.print_preview_dialog)
         self.pb_print.clicked.connect(self.print_summary)
         self.pb_cancel.clicked.connect(self.close)
         self.pb_delete.clicked.connect(self.delete)
@@ -130,7 +143,6 @@ class VisitForm(uiVisitForm):
         self.print_content = header + self.s + tail
         self.te_reports.setHtml(self.print_content)
         # print(self.print_content[670:690])
-
 
     def print_summary(self):
         # check if anything to print
@@ -261,16 +273,39 @@ class VisitForm(uiVisitForm):
     def populate_procedures(self):
         allprocs = get_all_procedures()
         for proc in allprocs:
-            self.cmb_proc_model.entries.append((False, proc))
-        self.cmb_proc_model.layoutAboutToBeChanged.emit()
-        self.cmb_proc_model.layoutChanged.emit()
+            self.lv_model_proc_list.entries.append((False, proc))
+            self.original_proc_entries.append((False, proc))
+        self.lv_model_proc_list.layoutAboutToBeChanged.emit()
+        self.lv_model_proc_list.layoutChanged.emit()
         
     def populate_diagnoses(self):
         alldiags = dict(get_all_diagnoses())
         for diag in alldiags:
-            self.cmb_diag_model.entries.append((False, diag))
-        self.cmb_diag_model.layoutAboutToBeChanged.emit()
-        self.cmb_diag_model.layoutChanged.emit()
+            self.lv_model_diag_list.entries.append((False, diag))
+            self.original_diag_entries.append((False, diag))
+            # self.lv_model_diag.entries.append((False, diag))
+            # self.original_lv_diag_entries.append((False, diag))
+        self.lv_model_diag_list.layoutAboutToBeChanged.emit()
+        self.lv_model_diag_list.layoutChanged.emit()
+        # self.lv_model_diag.layoutAboutToBeChanged.emit()
+        # self.lv_model_diag.layoutChanged.emit()
+
+    def filter_diagnoses(self, filter_text):
+        self.lv_model_diag_list.entries.clear()
+        for entry in self.original_diag_entries:
+            if filter_text.lower() in entry[1].lower():
+                self.lv_model_diag_list.entries.append(entry)
+        self.lv_model_diag_list.layoutAboutToBeChanged.emit()
+        self.lv_model_diag_list.layoutChanged.emit()
+
+    def filter_procedures(self, filter_text):
+        self.lv_model_proc_list.entries.clear()
+        for entry in self.original_proc_entries:
+            if filter_text.lower() in entry[1].lower():
+                self.lv_model_proc_list.entries.append(entry)
+        self.lv_model_proc_list.layoutAboutToBeChanged.emit()
+        self.lv_model_proc_list.layoutChanged.emit()
+
 
     def rb_hip_clicked(self, button):
         self.hip_pelvic_tilt = f"{button.text()}"
@@ -993,8 +1028,7 @@ class VisitForm(uiVisitForm):
     @qtc.Slot()
     def add_procedure(self):
         text = self.le_proc.text()
-        text = text.strip()
-        text = string.capwords(text)
+        text = text.strip().upper()
         if text:
             self.lv_model_proc.entries.append((False, text))
             self.lv_model_proc.layoutAboutToBeChanged.emit()
@@ -1017,8 +1051,8 @@ class VisitForm(uiVisitForm):
 
     def add_diagnosis(self):
         text = self.le_diag.text()
-        text = text.strip()
-        text = string.capwords(text)
+        text = text.strip().upper()
+        # text = string.upper(text)
         if text:
             self.lv_model_diag.entries.append((False, text))
             self.lv_model_diag.layoutAboutToBeChanged.emit()
