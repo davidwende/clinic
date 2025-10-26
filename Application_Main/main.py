@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.append(os.path.abspath('../Database'))
 
+from pyisemail import is_email
 # from email_validaor import validate_email, EmailNotValidError
 
 from PySide6 import QtCore as qtc
@@ -268,7 +269,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         elif not surname.strip():
             e = True
             QMessageBox.warning(self, "Patient Data", "Missing Patient Surname!")
-        elif check_good_email(email) == error_codes.ERR_BAD:
+        elif not is_email(email):
             e = True
             QMessageBox.warning(self, "Patient Data", "Please provide a valid email!")
         elif check_good_phone(phone) == error_codes.ERR_BAD:
@@ -295,12 +296,12 @@ def check_good_phone(phone):
         print("Phone GOOD")
         return error_codes.ERR_OK
 
-def check_good_email(email):
-
-    if re.match(pattern, email):
-        return error_codes.ERR_OK
-    else:
-        return error_codes.ERR_BAD
+# def check_good_email(email):
+#
+#     if re.match(pattern, email):
+#         return error_codes.ERR_OK
+#     else:
+#         return error_codes.ERR_BAD
     #
     #
     # if email_pattern.fullmatch(email):
