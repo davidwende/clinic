@@ -1104,7 +1104,7 @@ class uiVisitForm(QMainWindow):
         gb_diagnoses = QGroupBox("Diagnoses")
         gb_diagnoses.setAlignment(Qt.AlignCenter)
         gb_diagnoses.setSizePolicy(sizePolicy)
-        WIDTH = 250
+        WIDTH = 350
         laydiag = QHBoxLayout()
         laydiag_buttons = QVBoxLayout()
         self.lv_diag = CustomListView()
@@ -1183,7 +1183,7 @@ class uiVisitForm(QMainWindow):
         gb_proc = QGroupBox("Procedures")
         gb_proc.setAlignment(Qt.AlignCenter)
         gb_proc.setSizePolicy(sizePolicy)
-        WIDTH = 250
+        WIDTH = 350
         # layproc = QGridLayout()
         layproc = QHBoxLayout()
         layproc_buttons = QVBoxLayout()
