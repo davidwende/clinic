@@ -56,7 +56,9 @@ class ListViewModel(qtc.QAbstractListModel):
 class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
     def __init__(self):
         super().__init__()
+
         self.setupUi(self)
+        self.le_dob.setDisplayFormat("dd/MM/yyyy")
 
 
         # self.action_Quit.triggered.connect(self.close)
