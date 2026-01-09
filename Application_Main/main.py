@@ -17,7 +17,8 @@ from Database.dbFuncs import get_all_patients, get_patient_by_id,\
     patient_exists, save_new_patient, modify_patient, num_visits, delete_patient,\
     visits_between_dates, visits_with_procedures_between_dates
 
-from Application_Main.UI.main_form import Ui_w_MainWindow
+from Application_Main.UI.uiMainForm import UI_MainWindow
+
 from Application_Login.Login import LoginForm
 # from Persons.add_person import AddPerson
 
@@ -53,12 +54,14 @@ class ListViewModel(qtc.QAbstractListModel):
     def clear(self):
         self.the_list.clear()
 
-class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
+class MainWindow(qtw.QMainWindow, UI_MainWindow):
+# Use the generated `Ui_w_MainWindow` which correctly parents widgets
+
     def __init__(self):
         super().__init__()
 
         self.setupUi(self)
-        self.le_dob.setDisplayFormat("dd/MM/yyyy")
+        #self.de_dob.setDisplayFormat("dd/MM/yyyy")
 
 
         # self.action_Quit.triggered.connect(self.close)
@@ -92,17 +95,17 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.search_timer.timeout.connect(lambda: self.proxy_model.setFilterFixedString(self.le_search.text()))
 
         # self.le_search.textChanged.connect(self.proxy_model.setFilterFixedString)
-        self.pb_PastHistory.clicked.connect(self.show_past_history)
-        self.pb_Visits.clicked.connect(self.show_visits)
+        self.bn_history.clicked.connect(self.show_past_history)
+        self.bn_visits.clicked.connect(self.show_visits)
 
         self.lv_patients.selectionModel().selectionChanged.connect(self.show_patient_details)
-        self.pb_save_new.clicked.connect(lambda : self.save_new_patient(True))
-        self.pb_modify.clicked.connect(lambda : self.save_new_patient(False))
-        self.pb_clear.clicked.connect(self.clear_data)
-        self.pb_delete.clicked.connect(self.delete_patient)
+        self.bn_save.clicked.connect(lambda : self.save_new_patient(True))
+        self.bn_modify.clicked.connect(lambda : self.save_new_patient(False))
+        self.bn_clear.clicked.connect(self.clear_data)
+        self.bn_delete.clicked.connect(self.delete_patient)
         # self.pb_Summary.clicked.connect(self.summary)
-        self.pb_refresh.clicked.connect(self.populate_patients)
-        self.pb_blood.clicked.connect(self.show_blood)
+        self.bn_refresh.clicked.connect(self.populate_patients)
+        self.bn_blood.clicked.connect(self.show_blood)
 
         button_style = ("""
             QPushButton {
@@ -116,15 +119,15 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
                 color: black;
             }
         """)
-        self.pb_save_new.setStyleSheet(button_style)
-        self.pb_modify.setStyleSheet(button_style)
-        self.pb_clear.setStyleSheet(button_style)
-        self.pb_delete.setStyleSheet(button_style)
-        self.pb_refresh.setStyleSheet(button_style)
-        self.pb_blood.setStyleSheet(button_style)
-        self.pb_Visits.setStyleSheet(button_style)
-        self.pb_PastHistory.setStyleSheet(button_style)
-        self.lb_Patient.setStyleSheet("border :2px solid black;")
+        self.bn_save.setStyleSheet(button_style)
+        self.bn_modify.setStyleSheet(button_style)
+        self.bn_clear.setStyleSheet(button_style)
+        self.bn_delete.setStyleSheet(button_style)
+        self.bn_refresh.setStyleSheet(button_style)
+        self.bn_blood.setStyleSheet(button_style)
+        self.bn_visits.setStyleSheet(button_style)
+        self.bn_history.setStyleSheet(button_style)
+        #self.lb_Patient.setStyleSheet("border :2px solid black;")
 
         self.populate_patients()
 
@@ -186,16 +189,16 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
             self.le_fname.setText(self.fname)
             self.le_surname.setText(self.surname)
             self.tz = fields[1].strip()
-            self.le_id.setText(self.tz)
+            self.le_tz.setText(self.tz)
             p = get_patient_by_id(fields[1].strip())
             self.le_email.setText(p[2])
             self.le_phone.setText(p[3])
             self.cb_smoker.setChecked(p[4])
             self.cb_consent.setChecked(p[5])
             self.rb_male.setChecked(p[1])
-            self.le_dob.setDate(p[0])
+            self.de_dob.setDate(p[0])
             self.rb_female.setChecked(not p[1])
-            self.lb_Patient.setText("Current Patient:   {}   {} {}".format(self.tz, self.fname, self.surname))
+            self.lb_current_patient.setText("  {}   {} {}".format(self.tz, self.fname, self.surname))
 
     def save_new_patient(self, SAVE_NEW):
         print("In save patient with ", SAVE_NEW)
@@ -207,7 +210,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         smoker = self.cb_smoker.isChecked()
         consent = self.cb_consent.isChecked()
         male = self.rb_male.isChecked()
-        dob = self.le_dob.date().toPython()
+        dob = self.de_dob.date().toPython()
         check = self.check_new_patient(tz, fname, surname, email, phone, dob, SAVE_NEW)
         match check:
             case error_codes.ERR_OK:
@@ -236,16 +239,16 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.lv_model.endResetModel()
         # self.lv_model.layoutAboutToBeChanged.emit()
         # self.lv_model.layoutChanged.emit()
-        self.le_total_pat.setText(str(self.lv_model.rowCount()))
-        toDate = self.de_to_date.date().toPython()
-        fromDate = self.de_from_date.date().toPython()
+        self.lb_total.setText(str(self.lv_model.rowCount()))
+        toDate = self.de_to.date().toPython()
+        fromDate = self.de_from.date().toPython()
 
         print("Emitted ===>", toDate, fromDate)
         vbd = visits_between_dates(fromDate, toDate)
         pbd = visits_with_procedures_between_dates(fromDate, toDate)
         print(vbd, pbd)
-        self.le_total_procedures.setText(str(pbd))
-        self.le_total_visits.setText(str(vbd))
+        self.lb_proc.setText(str(pbd))
+        self.lb_visits.setText(str(vbd))
 
     def clear_data(self):
         self.le_surname.setText('')
@@ -256,7 +259,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.cb_smoker.setChecked(False)
         self.cb_consent.setChecked(False)
         self.rb_male.setChecked(False)
-        self.le_dob.setDate(datetime.date.today())
+        self.de_dob.setDate(datetime.date.today())
         self.rb_female.setChecked(False)
     def check_new_patient(self, tz, fname, surname, email, phone, dob, ADD_PATIENT=True):
         tz = tz.strip()
