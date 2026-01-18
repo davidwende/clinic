@@ -279,9 +279,9 @@ class Visits(db.Entity):
     shoulder_resisted_adduction_r = Optional(bool, default=False, sql_default='1')
     shoulder_resisted_adduction_r_limit = Optional(bool, default=False, sql_default='1')
 
-    examination = Optional(str, 512)
+    examination = Optional(str, 10000)
     recommendation = Optional(str, 2000)
-    tests = Optional(str, 512)
+    tests = Optional(str, 10000)
 
     knee_scar_l = Optional(bool, default=False, sql_default='1')
     knee_scar_l_yes = Optional(bool, default=False, sql_default='1')
@@ -446,6 +446,8 @@ class BloodPulse(db.Entity):
 
 if connection['type'] == "mysql":
     db.bind(provider='mysql', host=host['ip'], user='dowende', passwd='', db='clinic2')
+    # db.bind(provider='mysql', host=host['ip'], user='david', passwd='osnat123', db='clinic')
+    # db.bind(provider='mysql', host=host['ip'], user='osnat', passwd='wende123', db='clinic')
     if connection['create'] == 'yes':
         db.generate_mapping(create_tables=True, check_tables=True)
     else:
