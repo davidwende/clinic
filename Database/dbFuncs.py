@@ -22,6 +22,34 @@ def get_patient_by_id(tz):
     # res = select( (p.dob, p.male, p.email, p.phone_number, p.smoking, p.consent ) for p in PatientCore if p.tz == tz)[:][0]
     # return res
 
+
+def validate_tz(tz: str) -> bool:
+    """
+    Validates an Israeli ID number (Teudat Zehut) using the Luhn-like algorithm.
+
+    The algorithm:
+    1. The ID must be exactly 9 digits.
+    2. Multiply each digit by 1 or 2 alternately (starting with 1).
+    3. If the result of a multiplication is >= 10, sum its two digits (e.g. 14 -> 1+4 = 5).
+    4. Sum all the results — a valid ID has a total divisible by 10.
+    """
+    # Remove whitespace and leading zeros padding, but keep as string
+    tz = tz.strip()
+
+    # Must be exactly 9 digits
+    if not tz.isdigit() or len(tz) != 9:
+        return False
+
+    total = 0
+    for i, digit in enumerate(tz):
+        n = int(digit) * (1 if i % 2 == 0 else 2)
+        if n >= 10:
+            n = (n // 10) + (n % 10)
+        total += n
+
+    return total % 10 == 0
+
+
 @db_session
 def save_new_patient(tz, fname, surname, email, phone, smoker, dob, male, consent):
     PatientCore(tz = tz,
@@ -123,7 +151,10 @@ def patient_exists(tz):
 @db_session
 def visit_exists(tz, d):
     p = PatientCore[tz]
-    return Visits.exists(patient=p, visit_date=d)
+    # print("Patient is {}".format(p))
+    e = Visits.exists(patient=p, visit_date=d)
+    # print("In visit_exists with tz {} and date {}, Exists {}".format(tz,d,e))
+    return e
 
 @db_session
 def num_visits(tz):
@@ -512,6 +543,7 @@ def get_visit(tz, date):
         diags = [(x.diagnosis, x.detail) for x in visit_data.diagnoses]
         return visit_data, procs, diags
     else:
+        print("In get_visit - not found patient")
         return error_codes.ERR_BAD, error_codes.ERR_BAD, error_codes.ERR_BAD
 
 @db_session
@@ -536,4 +568,338 @@ def visits_with_procedures_between_dates(start_date, end_date):
                  and v.visit_date <= end_date
                  and exists(proc for proc in v.procedures))
     # return 0
-#
+
+@db_session
+def modify_patient_tz(old_tz, new_tz):
+    if patient_exists(new_tz):
+        return False  # new tz exists
+    old_patient = PatientCore[old_tz]
+    # Create new patient
+    new_patient = PatientCore(tz=new_tz,
+                              fname=old_patient.fname,
+                              surname=old_patient.surname,
+                              dob=old_patient.dob,
+                              male=old_patient.male,
+                              email=old_patient.email,
+                              phone_number=old_patient.phone_number,
+                              smoking=old_patient.smoking,
+                              consent=old_patient.consent)
+    # Copy visits
+    for visit in old_patient.visits:
+        # Create new visit with new patient
+        new_visit = Visits(patient=new_patient, visit_date=visit.visit_date)
+        # Copy all fields
+        new_visit.cc_onset = visit.cc_onset
+        new_visit.cc_description = visit.cc_description
+        new_visit.cc_walking = visit.cc_walking
+        new_visit.cc_walking_le = visit.cc_walking_le
+        new_visit.cc_standing = visit.cc_standing
+        new_visit.cc_standing_le = visit.cc_standing_le
+        new_visit.cc_sitting = visit.cc_sitting
+        new_visit.cc_sitting_le = visit.cc_sitting_le
+        new_visit.cc_lying = visit.cc_lying
+        new_visit.cc_lying_le = visit.cc_lying_le
+        new_visit.cc_lifting = visit.cc_lifting
+        new_visit.cc_lifting_le = visit.cc_lifting_le
+        new_visit.cc_shoulder_move = visit.cc_shoulder_move
+        new_visit.cc_shoulder_move_le = visit.cc_shoulder_move_le
+        # Location
+        new_visit.cc_loc_neck = visit.cc_loc_neck
+        new_visit.cc_loc_spine = visit.cc_loc_spine
+        new_visit.cc_loc_back = visit.cc_loc_back
+        new_visit.cc_loc_shoulder_l = visit.cc_loc_shoulder_l
+        new_visit.cc_loc_shoulder_r = visit.cc_loc_shoulder_r
+        new_visit.cc_loc_hips_l = visit.cc_loc_hips_l
+        new_visit.cc_loc_hips_r = visit.cc_loc_hips_r
+        new_visit.cc_loc_groin_l = visit.cc_loc_groin_l
+        new_visit.cc_loc_groin_r = visit.cc_loc_groin_r
+        new_visit.cc_loc_knee_l = visit.cc_loc_knee_l
+        new_visit.cc_loc_knee_r = visit.cc_loc_knee_r
+        new_visit.cc_loc_ankle_l = visit.cc_loc_ankle_l
+        new_visit.cc_loc_ankle_r = visit.cc_loc_ankle_r
+        new_visit.cc_loc_other = visit.cc_loc_other
+        new_visit.cc_loc_precise_le = visit.cc_loc_precise_le
+        new_visit.cc_loc_radiates_le = visit.cc_loc_radiates_le
+        # Back
+        new_visit.back_movement_le = visit.back_movement_le
+        new_visit.back_trend_l = visit.back_trend_l
+        new_visit.back_trend_r = visit.back_trend_r
+        new_visit.back_trend_l_pos = visit.back_trend_l_pos
+        new_visit.back_trend_r_pos = visit.back_trend_r_pos
+        new_visit.back_slr_l_le = visit.back_slr_l_le
+        new_visit.back_slr_r_le = visit.back_slr_r_le
+        new_visit.back_fst_l = visit.back_fst_l
+        new_visit.back_fst_l_pos = visit.back_fst_l_pos
+        new_visit.back_fst_r = visit.back_fst_r
+        new_visit.back_fst_r_pos = visit.back_fst_r_pos
+        new_visit.back_hip_l = visit.back_hip_l
+        new_visit.back_hip_l_pain = visit.back_hip_l_pain
+        new_visit.back_hip_r = visit.back_hip_r
+        new_visit.back_hip_r_pain = visit.back_hip_r_pain
+        new_visit.back_thigh_l = visit.back_thigh_l
+        new_visit.back_thigh_l_pos = visit.back_thigh_l_pos
+        new_visit.back_thigh_r = visit.back_thigh_r
+        new_visit.back_thigh_r_pos = visit.back_thigh_r_pos
+        new_visit.back_fabere_l = visit.back_fabere_l
+        new_visit.back_fabere_l_pos = visit.back_fabere_l_pos
+        new_visit.back_fabere_r = visit.back_fabere_r
+        new_visit.back_fabere_r_pos = visit.back_fabere_r_pos
+        new_visit.back_sensation = visit.back_sensation
+        new_visit.back_sensation_equals = visit.back_sensation_equals
+        new_visit.back_sensation_le = visit.back_sensation_le
+        new_visit.back_power = visit.back_power
+        new_visit.back_power_equals = visit.back_power_equals
+        new_visit.back_power_le = visit.back_power_le
+        new_visit.back_reflexes = visit.back_reflexes
+        new_visit.back_reflexes_equals = visit.back_reflexes_equals
+        new_visit.back_reflexes_le = visit.back_reflexes_le
+        new_visit.back_tspine_rot_l = visit.back_tspine_rot_l
+        new_visit.back_tspine_rot_l_pain = visit.back_tspine_rot_l_pain
+        new_visit.back_tspine_rot_r = visit.back_tspine_rot_r
+        new_visit.back_tspine_rot_r_pain = visit.back_tspine_rot_r_pain
+        new_visit.back_tspine_tender_le = visit.back_tspine_tender_le
+        new_visit.back_abduction_l = visit.back_abduction_l
+        new_visit.back_abduction_l_pos = visit.back_abduction_l_pos
+        new_visit.back_abduction_r = visit.back_abduction_r
+        new_visit.back_abduction_r_pos = visit.back_abduction_r_pos
+        new_visit.back_lat_rot_l = visit.back_lat_rot_l
+        new_visit.back_lat_rot_l_pos = visit.back_lat_rot_l_pos
+        new_visit.back_lat_rot_r = visit.back_lat_rot_r
+        new_visit.back_lat_rot_r_pos = visit.back_lat_rot_r_pos
+        new_visit.back_adduction_l = visit.back_adduction_l
+        new_visit.back_adduction_l_pos = visit.back_adduction_l_pos
+        new_visit.back_adduction_r = visit.back_adduction_r
+        new_visit.back_adduction_r_pos = visit.back_adduction_r_pos
+        new_visit.back_flexion_l = visit.back_flexion_l
+        new_visit.back_flexion_l_pos = visit.back_flexion_l_pos
+        new_visit.back_flexion_r = visit.back_flexion_r
+        new_visit.back_flexion_r_pos = visit.back_flexion_r_pos
+        new_visit.back_tenderness_le = visit.back_tenderness_le
+        # Hip
+        new_visit.hip_pelvic_tilt = visit.hip_pelvic_tilt
+        new_visit.hip_pelvic_tilt_type = visit.hip_pelvic_tilt_type
+        new_visit.hip_trend_l = visit.hip_trend_l
+        new_visit.hip_trend_r = visit.hip_trend_r
+        new_visit.hip_trend_l_pos = visit.hip_trend_l_pos
+        new_visit.hip_trend_r_pos = visit.hip_trend_r_pos
+        new_visit.hip_passive_lat_rot_l_le = visit.hip_passive_lat_rot_l_le
+        new_visit.hip_passive_lat_rot_r_le = visit.hip_passive_lat_rot_r_le
+        new_visit.hip_passive_medial_rot_l_le = visit.hip_passive_medial_rot_l_le
+        new_visit.hip_passive_medial_rot_r_le = visit.hip_passive_medial_rot_r_le
+        new_visit.hip_passive_flexion_l_le = visit.hip_passive_flexion_l_le
+        new_visit.hip_passive_flexion_r_le = visit.hip_passive_flexion_r_le
+        new_visit.hip_passive_med_rot_l = visit.hip_passive_med_rot_l
+        new_visit.hip_passive_med_rot_l_limit = visit.hip_passive_med_rot_l_limit
+        new_visit.hip_passive_med_rot_r = visit.hip_passive_med_rot_r
+        new_visit.hip_passive_med_rot_r_limit = visit.hip_passive_med_rot_r_limit
+        new_visit.hip_passive_flexion_l = visit.hip_passive_flexion_l
+        new_visit.hip_passive_flexion_l_limit = visit.hip_passive_flexion_l_limit
+        new_visit.hip_passive_flexion_r = visit.hip_passive_flexion_r
+        new_visit.hip_passive_flexion_r_limit = visit.hip_passive_flexion_r_limit
+        new_visit.hip_resisted_abd_l = visit.hip_resisted_abd_l
+        new_visit.hip_resisted_abd_l_limit = visit.hip_resisted_abd_l_limit
+        new_visit.hip_resisted_abd_r = visit.hip_resisted_abd_r
+        new_visit.hip_resisted_abd_r_limit = visit.hip_resisted_abd_r_limit
+        new_visit.hip_resisted_lat_rot_l = visit.hip_resisted_lat_rot_l
+        new_visit.hip_resisted_lat_rot_l_limit = visit.hip_resisted_lat_rot_l_limit
+        new_visit.hip_resisted_lat_rot_r = visit.hip_resisted_lat_rot_r
+        new_visit.hip_resisted_lat_rot_r_limit = visit.hip_resisted_lat_rot_r_limit
+        new_visit.hip_resisted_med_rot_l = visit.hip_resisted_med_rot_l
+        new_visit.hip_resisted_med_rot_l_limit = visit.hip_resisted_med_rot_l_limit
+        new_visit.hip_resisted_med_rot_r = visit.hip_resisted_med_rot_r
+        new_visit.hip_resisted_med_rot_r_limit = visit.hip_resisted_med_rot_r_limit
+        new_visit.hip_resisted_adduction_l = visit.hip_resisted_adduction_l
+        new_visit.hip_resisted_adduction_l_limit = visit.hip_resisted_adduction_l_limit
+        new_visit.hip_resisted_adduction_r = visit.hip_resisted_adduction_r
+        new_visit.hip_resisted_adduction_r_limit = visit.hip_resisted_adduction_r_limit
+        new_visit.hip_resisted_flexion_l = visit.hip_resisted_flexion_l
+        new_visit.hip_resisted_flexion_l_limit = visit.hip_resisted_flexion_l_limit
+        new_visit.hip_resisted_flexion_r = visit.hip_resisted_flexion_r
+        new_visit.hip_resisted_flexion_r_limit = visit.hip_resisted_flexion_r_limit
+        new_visit.hip_resisted_extension_l = visit.hip_resisted_extension_l
+        new_visit.hip_resisted_extension_l_limit = visit.hip_resisted_extension_l_limit
+        new_visit.hip_resisted_extension_r = visit.hip_resisted_extension_r
+        new_visit.hip_resisted_extension_r_limit = visit.hip_resisted_extension_r_limit
+        new_visit.hip_tenderness = visit.hip_tenderness
+        new_visit.hip_other = visit.hip_other
+        # Neck
+        new_visit.neck_extension_le = visit.neck_extension_le
+        new_visit.neck_rotation_l_le = visit.neck_rotation_l_le
+        new_visit.neck_rotation_r_le = visit.neck_rotation_r_le
+        new_visit.neck_cranial_le = visit.neck_cranial_le
+        new_visit.neck_sensation = visit.neck_sensation
+        new_visit.neck_sensation_equals = visit.neck_sensation_equals
+        new_visit.neck_sensation_le = visit.neck_sensation_le
+        new_visit.neck_power = visit.neck_power
+        new_visit.neck_power_equals = visit.neck_power_equals
+        new_visit.neck_power_le = visit.neck_power_le
+        new_visit.neck_reflexes = visit.neck_reflexes
+        new_visit.neck_reflexes_equals = visit.neck_reflexes_equals
+        new_visit.neck_reflexes_le = visit.neck_reflexes_le
+        new_visit.neck_tenderness_le = visit.neck_tenderness_le
+        new_visit.neck_other_le = visit.neck_other_le
+        # Shoulder
+        new_visit.shoulder_align_l = visit.shoulder_align_l
+        new_visit.shoulder_align_l_ab = visit.shoulder_align_l_ab
+        new_visit.shoulder_align_l_le = visit.shoulder_align_l_le
+        new_visit.shoulder_align_r = visit.shoulder_align_r
+        new_visit.shoulder_align_r_ab = visit.shoulder_align_r_ab
+        new_visit.shoulder_align_r_le = visit.shoulder_align_r_le
+        new_visit.shoulder_rom_l = visit.shoulder_rom_l
+        new_visit.shoulder_rom_l_full = visit.shoulder_rom_l_full
+        new_visit.shoulder_rom_r = visit.shoulder_rom_r
+        new_visit.shoulder_rom_r_full = visit.shoulder_rom_r_full
+        new_visit.shoulder_jobes_l = visit.shoulder_jobes_l
+        new_visit.shoulder_jobes_l_pos = visit.shoulder_jobes_l_pos
+        new_visit.shoulder_jobes_r = visit.shoulder_jobes_r
+        new_visit.shoulder_jobes_r_pos = visit.shoulder_jobes_r_pos
+        new_visit.shoulder_passive_abduction_l_le = visit.shoulder_passive_abduction_l_le
+        new_visit.shoulder_passive_abduction_r_le = visit.shoulder_passive_abduction_r_le
+        new_visit.shoulder_passive_lat_rot_l_le = visit.shoulder_passive_lat_rot_l_le
+        new_visit.shoulder_passive_lat_rot_r_le = visit.shoulder_passive_lat_rot_r_le
+        new_visit.shoulder_passive_med_rot_l = visit.shoulder_passive_med_rot_l
+        new_visit.shoulder_passive_med_rot_l_limit = visit.shoulder_passive_med_rot_l_limit
+        new_visit.shoulder_passive_med_rot_l_pain = visit.shoulder_passive_med_rot_l_pain
+        new_visit.shoulder_passive_med_rot_r = visit.shoulder_passive_med_rot_r
+        new_visit.shoulder_passive_med_rot_r_limit = visit.shoulder_passive_med_rot_r_limit
+        new_visit.shoulder_passive_med_rot_r_pain = visit.shoulder_passive_med_rot_r_pain
+        new_visit.shoulder_passive_adduction_l = visit.shoulder_passive_adduction_l
+        new_visit.shoulder_passive_adduction_l_limit = visit.shoulder_passive_adduction_l_limit
+        new_visit.shoulder_passive_adduction_l_pain = visit.shoulder_passive_adduction_l_pain
+        new_visit.shoulder_passive_adduction_r = visit.shoulder_passive_adduction_r
+        new_visit.shoulder_passive_adduction_r_limit = visit.shoulder_passive_adduction_r_limit
+        new_visit.shoulder_passive_adduction_r_pain = visit.shoulder_passive_adduction_r_pain
+        new_visit.shoulder_resisted_abduction_l_le = visit.shoulder_resisted_abduction_l_le
+        new_visit.shoulder_resisted_abduction_r_le = visit.shoulder_resisted_abduction_r_le
+        new_visit.shoulder_resisted_lat_rot_l_le = visit.shoulder_resisted_lat_rot_l_le
+        new_visit.shoulder_resisted_lat_rot_r_le = visit.shoulder_resisted_lat_rot_r_le
+        new_visit.shoulder_resisted_med_rot_l = visit.shoulder_resisted_med_rot_l
+        new_visit.shoulder_resisted_med_rot_l_limit = visit.shoulder_resisted_med_rot_l_limit
+        new_visit.shoulder_resisted_med_rot_r = visit.shoulder_resisted_med_rot_r
+        new_visit.shoulder_resisted_med_rot_r_limit = visit.shoulder_resisted_med_rot_r_limit
+        new_visit.shoulder_resisted_adduction_l = visit.shoulder_resisted_adduction_l
+        new_visit.shoulder_resisted_adduction_l_limit = visit.shoulder_resisted_adduction_l_limit
+        new_visit.shoulder_resisted_adduction_r = visit.shoulder_resisted_adduction_r
+        new_visit.shoulder_resisted_adduction_r_limit = visit.shoulder_resisted_adduction_r_limit
+        # Examination, recommendation, tests
+        new_visit.examination = visit.examination
+        new_visit.recommendation = visit.recommendation
+        new_visit.tests = visit.tests
+        # Knee
+        new_visit.knee_scar_l = visit.knee_scar_l
+        new_visit.knee_scar_l_yes = visit.knee_scar_l_yes
+        new_visit.knee_scar_r = visit.knee_scar_r
+        new_visit.knee_scar_r_yes = visit.knee_scar_r_yes
+        new_visit.knee_align_l = visit.knee_align_l
+        new_visit.knee_align_l_ab = visit.knee_align_l_ab
+        new_visit.knee_align_l_le = visit.knee_align_l_le
+        new_visit.knee_align_r = visit.knee_align_r
+        new_visit.knee_align_r_ab = visit.knee_align_r_ab
+        new_visit.knee_align_r_le = visit.knee_align_r_le
+        new_visit.knee_muscle_l = visit.knee_muscle_l
+        new_visit.knee_muscle_l_yes = visit.knee_muscle_l_yes
+        new_visit.knee_muscle_r = visit.knee_muscle_r
+        new_visit.knee_muscle_r_yes = visit.knee_muscle_r_yes
+        new_visit.knee_effusion_l = visit.knee_effusion_l
+        new_visit.knee_effusion_l_yes = visit.knee_effusion_l_yes
+        new_visit.knee_effusion_r = visit.knee_effusion_r
+        new_visit.knee_effusion_r_yes = visit.knee_effusion_r_yes
+        new_visit.knee_rom_l = visit.knee_rom_l
+        new_visit.knee_rom_r = visit.knee_rom_r
+        new_visit.knee_res_ext_l = visit.knee_res_ext_l
+        new_visit.knee_res_ext_l_yes = visit.knee_res_ext_l_yes
+        new_visit.knee_res_ext_r = visit.knee_res_ext_r
+        new_visit.knee_res_ext_r_yes = visit.knee_res_ext_r_yes
+        new_visit.knee_res_flexion_l = visit.knee_res_flexion_l
+        new_visit.knee_res_flexion_l_yes = visit.knee_res_flexion_l_yes
+        new_visit.knee_res_flexion_r = visit.knee_res_flexion_r
+        new_visit.knee_res_flexion_r_yes = visit.knee_res_flexion_r_yes
+        new_visit.knee_macmurray_l = visit.knee_macmurray_l
+        new_visit.knee_macmurray_l_pos = visit.knee_macmurray_l_pos
+        new_visit.knee_macmurray_r = visit.knee_macmurray_r
+        new_visit.knee_macmurray_r_pos = visit.knee_macmurray_r_pos
+        new_visit.knee_grind_l = visit.knee_grind_l
+        new_visit.knee_grind_l_pos = visit.knee_grind_l_pos
+        new_visit.knee_grind_r = visit.knee_grind_r
+        new_visit.knee_grind_r_pos = visit.knee_grind_r_pos
+        new_visit.knee_mcl_l = visit.knee_mcl_l
+        new_visit.knee_mcl_lax_l = visit.knee_mcl_lax_l
+        new_visit.knee_mcl_r = visit.knee_mcl_r
+        new_visit.knee_mcl_lax_r = visit.knee_mcl_lax_r
+        new_visit.knee_lcl_l = visit.knee_lcl_l
+        new_visit.knee_lcl_lax_l = visit.knee_lcl_lax_l
+        new_visit.knee_lcl_r = visit.knee_lcl_r
+        new_visit.knee_lcl_lax_r = visit.knee_lcl_lax_r
+        new_visit.knee_tender_l_le = visit.knee_tender_l_le
+        new_visit.knee_tender_r_le = visit.knee_tender_r_le
+        new_visit.knee_other_le = visit.knee_other_le
+        # Ankle
+        new_visit.ankle_scar_l = visit.ankle_scar_l
+        new_visit.ankle_scar_l_yes = visit.ankle_scar_l_yes
+        new_visit.ankle_scar_r = visit.ankle_scar_r
+        new_visit.ankle_scar_r_yes = visit.ankle_scar_r_yes
+        new_visit.ankle_align_l = visit.ankle_align_l
+        new_visit.ankle_align_l_pronated = visit.ankle_align_l_pronated
+        new_visit.ankle_align_r = visit.ankle_align_r
+        new_visit.ankle_align_r_pronated = visit.ankle_align_r_pronated
+        new_visit.ankle_dors_l_le = visit.ankle_dors_l_le
+        new_visit.ankle_dors_r_le = visit.ankle_dors_r_le
+        new_visit.ankle_plant_l_le = visit.ankle_plant_l_le
+        new_visit.ankle_plant_r_le = visit.ankle_plant_r_le
+        new_visit.ankle_inversion_l_le = visit.ankle_inversion_l_le
+        new_visit.ankle_inversion_r_le = visit.ankle_inversion_r_le
+        new_visit.ankle_eversion_l_le = visit.ankle_eversion_l_le
+        new_visit.ankle_eversion_r_le = visit.ankle_eversion_r_le
+        new_visit.ankle_tender_le_l = visit.ankle_tender_le_l
+        new_visit.ankle_tender_le_r = visit.ankle_tender_le_r
+        new_visit.anklest_addpain_l = visit.anklest_addpain_l
+        new_visit.anklest_addpain_yes_l = visit.anklest_addpain_yes_l
+        new_visit.anklest_addpain_r = visit.anklest_addpain_r
+        new_visit.anklest_addpain_yes_r = visit.anklest_addpain_yes_r
+        new_visit.anklest_abcpain_l = visit.anklest_abcpain_l
+        new_visit.anklest_abcpain_yes_l = visit.anklest_abcpain_yes_l
+        new_visit.anklest_abcpain_r = visit.anklest_abcpain_r
+        new_visit.anklest_abcpain_yes_r = visit.anklest_abcpain_yes_r
+        new_visit.anklest_addlimited_l = visit.anklest_addlimited_l
+        new_visit.anklest_addlimited_yes_l = visit.anklest_addlimited_yes_l
+        new_visit.anklest_addlimited_r = visit.anklest_addlimited_r
+        new_visit.anklest_addlimited_yes_r = visit.anklest_addlimited_yes_r
+        new_visit.anklest_abclimited_l = visit.anklest_abclimited_l
+        new_visit.anklest_abclimited_yes_l = visit.anklest_abclimited_yes_l
+        new_visit.anklest_abclimited_r = visit.anklest_abclimited_r
+        new_visit.anklest_abclimited_yes_r = visit.anklest_abclimited_yes_r
+        # Copy procedures and diagnoses
+        for proc in visit.procedures:
+            Procedures(visit=new_visit, procedure=proc.procedure, detail=proc.detail)
+        for diag in visit.diagnoses:
+            Diagnoses(visit=new_visit, diagnosis=diag.diagnosis, detail=diag.detail)
+        # Copy bloodpulse
+        for bp in visit.bloodpulse:
+            BloodPulse(visit=new_visit, time=bp.time, pulse=bp.pulse, systolic=bp.systolic, diastolic=bp.diastolic)
+    # Handle PastHistory
+    if PastHistory.exists(tz=old_tz):
+        old_ph = PastHistory[old_tz]
+        new_ph = PastHistory(tz=new_tz,
+                             hypertension=old_ph.hypertension,
+                             diabetes=old_ph.diabetes,
+                             blood=old_ph.blood,
+                             blood_descr=old_ph.blood_descr,
+                             malignancy=old_ph.malignancy,
+                             malignancy_date=old_ph.malignancy_date,
+                             malignancy_details=old_ph.malignancy_details,
+                             malignancy_remiss=old_ph.malignancy_remiss,
+                             disable=old_ph.disable,
+                             disable_details=old_ph.disable_details,
+                             operations=old_ph.operations,
+                             trauma=old_ph.trauma)
+        # Update nacs and acs
+        for nac in old_ph.nacs:
+            Nac(pasthistory=new_ph, nac=nac.nac)
+        for ac in old_ph.acs:
+            Ac(pasthistory=new_ph, ac=ac.ac)
+        old_ph.delete()
+    # Delete old visits (after copying)
+    delete(v for v in Visits if v.patient == old_patient)
+    # Delete old patient
+    old_patient.delete()
+    return True

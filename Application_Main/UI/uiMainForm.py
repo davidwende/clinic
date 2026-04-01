@@ -150,10 +150,12 @@ class UI_MainWindow(object):
         self.bn_save = QPushButton("Save as new Patient")
         self.bn_modify = QPushButton("Modify Patient Data")
         self.bn_delete = QPushButton("Delete Patient Data")
+        self.bn_modify_tz = QPushButton("Modify TZ")
 
         hbox_actions.addWidget(self.bn_save)
         hbox_actions.addWidget(self.bn_modify)
         hbox_actions.addWidget(self.bn_delete)
+        hbox_actions.addWidget(self.bn_modify_tz)
 
         right_layout.addLayout(hbox_actions)
         right_layout.addStretch()

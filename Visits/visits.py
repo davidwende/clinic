@@ -257,7 +257,7 @@ class VisitForm(uiVisitForm):
         new_value = self.cb_date.currentText()
         # Get the text of the old item
         old_value = self.cb_date.itemText(self.old_index)
-        # print("In change_visit_date old value {} new value {}".format(old_value, new_value))
+        print("In change_visit_date old value {} new value {}".format(old_value, new_value))
         if old_value == self.today and new_value != self.today:
             msgBox = QMessageBox(self)
             msgBox.setText("You are nagivating away from todays visit. Continue?")
@@ -320,6 +320,7 @@ class VisitForm(uiVisitForm):
         self.show_visit(self.today)
 
     def show_visit(self, d):
+        print("In show_visit")
         self.clear_visit_form()
         year, month, day = d.split()
         self.visit_date = datetime.date(int(year), int(month), int(day))
@@ -653,6 +654,8 @@ class VisitForm(uiVisitForm):
                             w.setEnabled(False)
                         else:  # If checkbox A is checked
                             w.setEnabled(True)
+        else:
+            print("In show_visit : visit does not exist ====")
 
     @qtc.Slot()
     def save_new_visit(self, button):

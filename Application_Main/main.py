@@ -15,7 +15,8 @@ from PySide6.QtCore import QSortFilterProxyModel
 from PySide6 import QtGui as qtg
 from Database.dbFuncs import get_all_patients, get_patient_by_id,\
     patient_exists, save_new_patient, modify_patient, num_visits, delete_patient,\
-    visits_between_dates, visits_with_procedures_between_dates
+    visits_between_dates, visits_with_procedures_between_dates, modify_patient_tz, \
+    validate_tz
 
 from Application_Main.UI.uiMainForm import UI_MainWindow
 
@@ -106,6 +107,7 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         # self.pb_Summary.clicked.connect(self.summary)
         self.bn_refresh.clicked.connect(self.populate_patients)
         self.bn_blood.clicked.connect(self.show_blood)
+        self.bn_modify_tz.clicked.connect(self.modify_tz)
 
         button_style = ("""
             QPushButton {
@@ -127,6 +129,7 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         self.bn_blood.setStyleSheet(button_style)
         self.bn_visits.setStyleSheet(button_style)
         self.bn_history.setStyleSheet(button_style)
+        self.bn_modify_tz.setStyleSheet(button_style)
         #self.lb_Patient.setStyleSheet("border :2px solid black;")
 
         self.populate_patients()
@@ -204,7 +207,7 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         print("In save patient with ", SAVE_NEW)
         fname = string.capwords(self.le_fname.text().strip())
         surname = string.capwords(self.le_surname.text().strip())
-        tz = self.le_id.text().strip()
+        tz = self.le_tz.text().strip()
         email = self.le_email.text().strip()
         phone = self.le_phone.text().strip()
         smoker = self.cb_smoker.isChecked()
@@ -253,7 +256,7 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
     def clear_data(self):
         self.le_surname.setText('')
         self.le_fname.setText('')
-        self.le_id.setText('')
+        self.le_tz.setText('')
         self.le_email.setText('')
         self.le_phone.setText('')
         self.cb_smoker.setChecked(False)
@@ -261,13 +264,39 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         self.rb_male.setChecked(False)
         self.de_dob.setDate(datetime.date.today())
         self.rb_female.setChecked(False)
+
+    def modify_tz(self):
+        if not self.tz:
+            QMessageBox.warning(self, "Modify TZ", "Choose a patient first")
+            return
+        new_tz, ok = qtw.QInputDialog.getText(self, "Modify TZ", "Enter new TZ number:", text=self.tz)
+        if not ok:
+            return
+        new_tz = new_tz.strip()
+        if len(new_tz) != 9 or not new_tz.isdigit():
+            QMessageBox.warning(self, "Modify TZ", "TZ must be 9 digits")
+            return
+        if patient_exists(new_tz):
+            QMessageBox.warning(self, "Modify TZ", "New TZ already exists")
+            return
+        if modify_patient_tz(self.tz, new_tz):
+            QMessageBox.information(self, "Modify TZ", "TZ modified successfully")
+            self.populate_patients()
+            # Clear selection or update
+            self.tz = new_tz
+            self.show_patient_details()  # to refresh display
+        else:
+            QMessageBox.warning(self, "Modify TZ", "Failed to modify TZ")
     def check_new_patient(self, tz, fname, surname, email, phone, dob, ADD_PATIENT=True):
         tz = tz.strip()
         e = False
-        print("len ", len(tz), tz.isdigit())
-        if len(tz) != 9 or not tz.isdigit():
+        # print("len ", len(tz), tz.isdigit())
+        if not validate_tz(tz):
             e = True
-            QMessageBox.warning(self, "Patient Data", "Missing 9 digits for ID!")
+            QMessageBox.warning(self, "Patient Data", "Invalid TZ number!")
+        # elif len(tz) != 9 or not tz.isdigit():
+        #     e = True
+        #     QMessageBox.warning(self, "Patient Data", "Missing 9 digits for ID!")
         elif not fname.strip():
             e = True
             QMessageBox.warning(self, "Patient Data", "Missing Patient First Name!")
