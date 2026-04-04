@@ -64,6 +64,8 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         self.setupUi(self)
         #self.de_dob.setDisplayFormat("dd/MM/yyyy")
 
+        self.le_tz.textChanged.connect(self.validate_tz_display)
+
 
         # self.action_Quit.triggered.connect(self.close)
         # self.action_Add_Person.triggered.connect(self.open_add_person)
@@ -133,6 +135,13 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         #self.lb_Patient.setStyleSheet("border :2px solid black;")
 
         self.populate_patients()
+
+    def validate_tz_display(self):
+        tz = self.le_tz.text().strip()
+        if validate_tz(tz):
+            self.le_tz.setStyleSheet("")
+        else:
+            self.le_tz.setStyleSheet("background-color: pink; color: darkblue;")
 
     def admin_mode(self):
         self.mode = "admin"
@@ -292,12 +301,14 @@ class MainWindow(qtw.QMainWindow, UI_MainWindow):
         e = False
         # print("len ", len(tz), tz.isdigit())
         if not validate_tz(tz):
-            e = True
-            QMessageBox.warning(self, "Patient Data", "Invalid TZ number!")
+            reply = QMessageBox.question(self, "Patient Data", "Invalid TZ number! Do you want to proceed anyway?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return error_codes.ERR_BAD
         # elif len(tz) != 9 or not tz.isdigit():
         #     e = True
         #     QMessageBox.warning(self, "Patient Data", "Missing 9 digits for ID!")
-        elif not fname.strip():
+            print("TZ BAD, continuing anyway")
+        if not fname.strip():
             e = True
             QMessageBox.warning(self, "Patient Data", "Missing Patient First Name!")
         elif not surname.strip():
