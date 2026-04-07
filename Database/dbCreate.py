@@ -445,8 +445,12 @@ class BloodPulse(db.Entity):
 
 
 if connection['type'] == "mysql":
-    db.bind(provider='mysql', host=host['ip'], user='dowende', passwd='', db='clinic2')
-    # db.bind(provider='mysql', host=host['ip'], user='david', passwd='osnat123', db='clinic')
+    # following line is for AWS
+    # db.bind(provider='mysql', host=host['ip'], user='dowende', passwd='', db='clinic2')
+
+    # following line is for local mysql server (dietpi)
+    db.bind(provider='mysql', host=host['ip'], user='david', passwd='osnat123', db='clinic')
+    
     # db.bind(provider='mysql', host=host['ip'], user='osnat', passwd='wende123', db='clinic')
     if connection['create'] == 'yes':
         db.generate_mapping(create_tables=True, check_tables=True)

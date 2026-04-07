@@ -4,8 +4,8 @@ david = "e2a962726204b69e65ad3530bd2e4c8fc9540b3535e388bd9be978aedd881608"
 michelle = "480913a0598751f416763e2766595b2b52bb006e97d39dffa26fece9e27c82cd"
 
 [host]
-# ip = "100.88.127.39"
-ip = "18.197.224.100"
+ip = "100.88.127.39"
+#ip = "18.197.224.100"
 
 [connection]
 #type = "sqlite"
