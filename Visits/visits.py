@@ -1024,9 +1024,19 @@ class VisitForm(uiVisitForm):
         for bg in self.findChildren(qtw.QButtonGroup):
             bg.setExclusive(True)
 
+        # Reset the display models and their backing dicts together.
+        # If only the model entries are cleared (without resetting visit_procs /
+        # visit_diags), navigating to a new unsaved date leaves stale procedure
+        # and diagnosis data in memory, which then gets written to the DB on save.
+        self.visit_procs = {}
         self.lv_model_proc.entries.clear()
         self.lv_model_proc.layoutAboutToBeChanged.emit()
         self.lv_model_proc.layoutChanged.emit()
+
+        self.visit_diags = {}
+        self.lv_model_diag.entries.clear()
+        self.lv_model_diag.layoutAboutToBeChanged.emit()
+        self.lv_model_diag.layoutChanged.emit()
 
     @qtc.Slot()
     def add_procedure(self):
