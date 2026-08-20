@@ -1,6 +1,4 @@
 # from weasyprint import HTML
-from PySide6.QtPrintSupport import QPrinter, QPrintDialog
-
 import error_codes
 from Database.dbFuncs import get_visit, get_past_history, get_acs, get_nacs
 import Config
@@ -292,7 +290,7 @@ class Report():
         if knee:
             self.h2("Knee")
             self.concatenate_if_true("Scarring (left): ", v.knee_scar_l, v.knee_scar_l_yes)
-            self.concatenate_if_true("Scarring (right): ", v.knee_scar_l, v.knee_scar_l_yes)
+            self.concatenate_if_true("Scarring (right): ", v.knee_scar_r, v.knee_scar_r_yes)
             self.add_cb_text_condition("Alignment (left): ", v.knee_align_l, "Abnormal", "NAD",
                                        v.knee_align_l_ab, v.knee_align_l_le)
             self.add_cb_text_condition("Alignment (right): ", v.knee_align_r, "Abnormal", "NAD",
@@ -315,9 +313,9 @@ class Report():
             self.concatenate_if_true("Patelofemoral Grinding (right): ", v.knee_grind_r, v.knee_grind_r_pos)
             self.add_text_condition("ROM (left): ", v.knee_rom_l)
             self.add_text_condition("ROM (right): ", v.knee_rom_r)
-            self.concatenate_if_true("MCL (left): ", v.knee_lcl_r, v.knee_lcl_lax_r, pos="Lax", neg="NAD")
-            self.concatenate_if_true("MCL (right): ", v.knee_lcl_r, v.knee_lcl_lax_r, pos="Lax", neg="NAD")
-            self.concatenate_if_true("LCL (left): ", v.knee_lcl_r, v.knee_lcl_lax_r, pos="Lax", neg="NAD")
+            self.concatenate_if_true("MCL (left): ", v.knee_mcl_l, v.knee_mcl_lax_l, pos="Lax", neg="NAD")
+            self.concatenate_if_true("MCL (right): ", v.knee_mcl_r, v.knee_mcl_lax_r, pos="Lax", neg="NAD")
+            self.concatenate_if_true("LCL (left): ", v.knee_lcl_l, v.knee_lcl_lax_l, pos="Lax", neg="NAD")
             self.concatenate_if_true("LCL (right): ", v.knee_lcl_r, v.knee_lcl_lax_r, pos="Lax", neg="NAD")
             self.add_text_condition("Tenderness (left): ", v.knee_tender_l_le)
             self.add_text_condition("Tenderness (right): ", v.knee_tender_r_le)
@@ -337,9 +335,9 @@ class Report():
                 self.concatenate_if_true("Scarring (right): ", v.ankle_scar_r, v.ankle_scar_r_yes)
 
                 self.add_cb_text_condition("Alignment (left)", v.ankle_align_l, "", "", True,
-                                          "Pronated" if  v.ankle_align_l_pronated else "Suppinated")
+                                          "Pronated" if  v.ankle_align_l_pronated else "Supinated")
                 self.add_cb_text_condition("Alignment (right)", v.ankle_align_r, "", "", True,
-                                           "Pronated" if v.ankle_align_r_pronated else "Suppinated")
+                                           "Pronated" if v.ankle_align_r_pronated else "Supinated")
 
                 # TODO Alignment
                 self.add_text_condition("Dorsflexion (left): ", v.ankle_dors_l_le)
@@ -373,13 +371,13 @@ class Report():
                                          pos="Limited", neg="Full Range")
         hip_assessment = interesting([v.hip_pelvic_tilt, v.hip_trend_l, v.hip_trend_r])
         hip_passive = interesting([v.hip_passive_lat_rot_l_le, v.hip_passive_lat_rot_r_le,
-            v.hip_passive_medial_rot_l_le,v.hip_passive_medial_rot_r_le,v.hip_passive_flexion_l_le, v.hip_passive_flexion_r])
+            v.hip_passive_medial_rot_l_le,v.hip_passive_medial_rot_r_le,v.hip_passive_flexion_l_le, v.hip_passive_flexion_r_le])
         hip_resisted = interesting([v.hip_resisted_abd_l, v.hip_resisted_abd_r,
             v.hip_resisted_lat_rot_l,    v.hip_resisted_lat_rot_r,
-            v.hip_resisted_med_rot_l, v.hip_resisted_med_rot_r,v.hip_resisted_adduction_l,v.hip_passive_flexion_r_le])
+            v.hip_resisted_med_rot_l, v.hip_resisted_med_rot_r,v.hip_resisted_adduction_l,v.hip_resisted_adduction_r])
         hip_other = interesting([v.hip_tenderness, v.hip_other])
         if hip_assessment or hip_passive or hip_resisted or hip_other:
-            self.h2("Ankle")
+            self.h2("Hip")
             if hip_assessment:
                 self.h3("Hip - Assessment")
                 self.add_cb_text_condition("Pelvic Tilt", v.hip_pelvic_tilt, "", "", True, v.hip_pelvic_tilt_type)

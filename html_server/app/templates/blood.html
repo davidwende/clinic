@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Blood / Pulse - {{ fname }} {{ surname }}{% endblock %}
+{% block content %}
+<div class="blood-page" data-tz="{{ tz }}" data-role="{{ user.role }}">
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+  <div class="visit-header">
+    <h2>Blood / Pulse: {{ tz }}   {{ fname }} {{ surname }}</h2>
+    <label>Date
+      <select id="blood-date-select"></select>
+    </label>
+    <span id="blood-date-badge" class="badge"></span>
+  </div>
+  <p id="form-message" class="form-message"></p>
+
+  <table class="blood-table">
+    <thead>
+      <tr><th>Time</th><th>Pulse</th><th>Systolic</th><th>Diastolic</th><th></th></tr>
+    </thead>
+    <tbody id="blood-rows"></tbody>
+  </table>
+
+  <fieldset class="visit-group blood-add-group">
+    <legend>Add a Reading</legend>
+    <div class="field field-text">
+      <label>Pulse Rate <input type="number" id="f-pulse" min="0" max="200"></label>
+    </div>
+    <div class="field field-text">
+      <label>Systolic <input type="number" id="f-systolic" min="0" max="254"></label>
+    </div>
+    <div class="field field-text">
+      <label>Diastolic <input type="number" id="f-diastolic" min="0" max="120"></label>
+    </div>
+    <button type="button" id="btn-add">Add a Reading</button>
+  </fieldset>
+
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+</div>
+<script src="/static/js/blood.js"></script>
+{% endblock %}

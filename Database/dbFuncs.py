@@ -2,8 +2,6 @@ from pony.orm import select, flush, count, delete, exists
 from datetime import date  # Import the datetime module
 from Database.dbCreate import PatientCore, PastHistory,\
     Nac, Ac, db_session, Visits, Procedures, BloodPulse, Diagnoses
-from PySide6.QtCore import QDate
-import error_codes
 import error_codes
 
 @db_session
@@ -264,7 +262,7 @@ def save_visit(tz, d, cc, loc, back, knee, ankle,anklest,
     v.back_tspine_rot_l_pain              = back[45]
     v.back_tspine_rot_r                   = back[46]
     v.back_tspine_rot_r_pain              = back[47]
-    v.back_tspine_tender                  = back[48]
+    v.back_tspine_tender_le                = back[48]
 
     v.back_movement_le                     = back[49]
     v.back_fst_l                           = back[50]
@@ -486,6 +484,18 @@ def get_all_procedures():
 def get_all_diagnoses():
     return select((d.diagnosis, d.detail) for d in Diagnoses).distinct().order_by(1)[:]
 
+@db_session
+def get_patients_by_diagnosis(diagnosis):
+    """Get all patients with a specific diagnosis"""
+    patients = select(d.visit.patient for d in Diagnoses if d.diagnosis == diagnosis).distinct()[:]
+    return [(p.tz, p.fname, p.surname) for p in patients]
+
+@db_session
+def get_patients_by_procedure(procedure):
+    """Get all patients with a specific procedure"""
+    patients = select(p.visit.patient for p in Procedures if p.procedure == procedure).distinct()[:]
+    return [(p.tz, p.fname, p.surname) for p in patients]
+
 
 @db_session
 def get_all_blood(tz, visit_date):
@@ -500,7 +510,13 @@ def get_all_blood(tz, visit_date):
 
     bloods = [(b.time, b.pulse, b.systolic, b.diastolic) for b in v.bloodpulse]
     print("returning ", bloods)
-    bloods.sort(key=lambda a: a[0])
+    # b.time comes back as a real datetime.time for a row still in Pony's
+    # identity map (just inserted, same session) but as a plain str for
+    # rows freshly loaded from a committed SELECT -- sorting the two
+    # against each other raises TypeError. str() is a stable, order-
+    # preserving sort key for both (HH:MM:SS[.ffffff] sorts the same
+    # lexicographically as chronologically).
+    bloods.sort(key=lambda a: str(a[0]))
     print("returning as sorted", bloods)
     return bloods
 
@@ -522,6 +538,26 @@ def add_blood_to_db(tz, visit_date, time, pulse, systolic, diastolic):
                pulse=pulse,
                systolic=systolic,
                diastolic=diastolic)
+
+
+@db_session
+def delete_blood_from_db(tz, visit_date, time):
+    p = PatientCore[tz]
+    if not Visits.exists(patient=p, visit_date=visit_date):
+        return error_codes.ERR_BAD
+    v = Visits[p, visit_date]
+    # A query-based delete, not BloodPulse[v, time].delete() -- the
+    # object-lookup path round-trips through Pony's identity map, whose
+    # cached .time attribute can come back as a plain str instead of
+    # datetime.time depending on session/caching state (see get_all_blood
+    # above), which breaks the primary-key delete. Building the WHERE
+    # clause straight from this function's own `time` parameter sidesteps
+    # that entirely.
+    matches = select(b for b in BloodPulse if b.visit == v and b.time == time)
+    if not matches.exists():
+        return error_codes.ERR_BAD
+    matches.delete(bulk=True)
+    return error_codes.ERR_OK
 
 @db_session
 def get_visit_dates(tz):

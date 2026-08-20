@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Patients - Clinic{% endblock %}
+{% block content %}
+<div class="patients-layout">
+  <section class="patient-list-pane">
+    <input type="text" id="search" placeholder="Enter search string" autocomplete="off">
+    <div class="list-meta">Total: <strong id="total-count">0</strong></div>
+    <table id="patient-table">
+      <thead>
+        <tr><th>Visits</th><th>ID</th><th>First Name</th><th>Surname</th></tr>
+      </thead>
+      <tbody id="patient-rows"></tbody>
+    </table>
+
+    <fieldset class="date-range">
+      <legend>Visit summary</legend>
+      <label>From <input type="date" id="date-from"></label>
+      <label>To <input type="date" id="date-to"></label>
+      <div>Visits: <strong id="visits-count">0</strong></div>
+      <div>Visits with procedures: <strong id="proc-count">0</strong></div>
+    </fieldset>
+  </section>
+
+  <section class="patient-detail-pane">
+    <h2 id="current-patient-label">No patient selected</h2>
+    <p id="form-message" class="form-message"></p>
+    <form id="patient-form" autocomplete="off">
+      <label>ID (TZ)
+        <input type="text" id="f-tz" maxlength="9" required>
+      </label>
+      <label>First Name
+        <input type="text" id="f-fname" maxlength="20" required>
+      </label>
+      <label>Surname
+        <input type="text" id="f-surname" maxlength="20" required>
+      </label>
+      <label>Email
+        <input type="email" id="f-email" maxlength="30" required>
+      </label>
+      <label>Phone
+        <input type="text" id="f-phone" maxlength="12" required>
+      </label>
+      <label>Date of Birth
+        <input type="date" id="f-dob" required>
+      </label>
+      <fieldset class="inline-fieldset">
+        <legend>Sex</legend>
+        <label><input type="radio" name="sex" id="f-male" value="male"> Male</label>
+        <label><input type="radio" name="sex" id="f-female" value="female"> Female</label>
+      </fieldset>
+      <label class="checkbox-label"><input type="checkbox" id="f-smoker"> Smoker</label>
+      <label class="checkbox-label"><input type="checkbox" id="f-consent"> Consent given</label>
+
+      <div class="button-row">
+        <button type="button" id="btn-save">Save New</button>
+        <button type="button" id="btn-modify">Modify</button>
+        <button type="button" id="btn-clear">Clear</button>
+        <button type="button" id="btn-delete">Delete</button>
+        <button type="button" id="btn-modify-tz">Modify TZ</button>
+        <button type="button" id="btn-refresh">Refresh</button>
+        <button type="button" id="btn-history">Past History</button>
+        <button type="button" id="btn-visits">Visits</button>
+        <button type="button" id="btn-blood">Blood / Pulse</button>
+        <button type="button" id="btn-diag-proc">Diagnoses / Procedures</button>
+      </div>
+    </form>
+  </section>
+</div>
+<script src="/static/js/patients.js"></script>
+{% endblock %}

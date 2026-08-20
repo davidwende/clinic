@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Past History - {{ fname }} {{ surname }}{% endblock %}
+{% block content %}
+<div class="history-page" data-tz="{{ tz }}">
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+  <h2>Past History: {{ tz }}   {{ fname }} {{ surname }}</h2>
+  <p id="form-message" class="form-message"></p>
+
+  <form id="history-form" class="history-form">
+    <fieldset class="history-block">
+      <legend>Conditions</legend>
+      <label class="checkbox-label"><input type="checkbox" id="h-hypertension"> Hypertension</label>
+      <label class="checkbox-label"><input type="checkbox" id="h-diabetes"> Diabetes</label>
+
+      <div class="history-row">
+        <label class="checkbox-label"><input type="checkbox" id="h-blood"> Blood Disorders</label>
+        <label>Details <input type="text" id="h-blood-descr"></label>
+      </div>
+
+      <div class="history-row">
+        <label class="checkbox-label"><input type="checkbox" id="h-malignancy"> Malignancies</label>
+        <label>Year of Onset <input type="text" id="h-malignancy-date" maxlength="15"></label>
+        <label>Details <input type="text" id="h-malignancy-details"></label>
+        <label class="checkbox-label"><input type="checkbox" id="h-malignancy-remiss"> Malignancy in Remission?</label>
+      </div>
+
+      <div class="history-row">
+        <label class="checkbox-label"><input type="checkbox" id="h-disable"> Disabilities</label>
+        <label>Details <input type="text" id="h-disable-details"></label>
+      </div>
+    </fieldset>
+
+    <div class="history-columns">
+      <fieldset class="history-block">
+        <legend>Medications NAC</legend>
+        <ul id="nac-list" class="med-list"></ul>
+        <div class="med-add-row">
+          <input type="text" id="nac-input" list="nac-options" placeholder="Medication name">
+          <datalist id="nac-options"></datalist>
+          <button type="button" id="btn-add-nac">Add NAC Medication</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="history-block">
+        <legend>Medications AC</legend>
+        <ul id="ac-list" class="med-list"></ul>
+        <div class="med-add-row">
+          <input type="text" id="ac-input" list="ac-options" placeholder="Medication name">
+          <datalist id="ac-options"></datalist>
+          <button type="button" id="btn-add-ac">Add AC Medication</button>
+        </div>
+      </fieldset>
+    </div>
+
+    <fieldset class="history-block">
+      <legend>Operations</legend>
+      <textarea id="h-operations" rows="4"></textarea>
+    </fieldset>
+
+    <fieldset class="history-block">
+      <legend>Trauma / Other</legend>
+      <textarea id="h-trauma" rows="4"></textarea>
+    </fieldset>
+
+    <div class="button-row">
+      <button type="button" id="btn-save">Save</button>
+      <a href="/patients"><button type="button">Cancel</button></a>
+    </div>
+  </form>
+</div>
+<script src="/static/js/past_history.js"></script>
+{% endblock %}

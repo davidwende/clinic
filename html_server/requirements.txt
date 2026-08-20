@@ -1,0 +1,11 @@
+# html_server dependencies. Install into an environment that also has this
+# repo's existing deps available (pony, tomli, pyisemail) since app/db.py
+# imports the shared Database package — e.g. reuse ../venv and add these on
+# top of it, or create a fresh venv with -r ../pyproject.toml deps too.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+jinja2>=3.1
+python-multipart>=0.0.9
+itsdangerous>=2.2
+bcrypt>=4.1
+pydantic>=2.7

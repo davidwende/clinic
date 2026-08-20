@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Visit - {{ fname }} {{ surname }}{% endblock %}
+{% block content %}
+<div class="visit-page" data-tz="{{ tz }}" data-role="{{ user.role }}">
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+  <div class="visit-header">
+    <h2>Visit: {{ tz }}   {{ fname }} {{ surname }}</h2>
+    <label>Date
+      <select id="visit-date-select"></select>
+    </label>
+    <span id="visit-date-badge" class="badge"></span>
+  </div>
+  <p id="form-message" class="form-message"></p>
+
+  <nav class="visit-tabs" id="visit-tabs"></nav>
+  <div class="visit-tab-content" id="visit-tab-content"></div>
+
+  <div class="button-row visit-actions">
+    <button type="button" id="btn-save">Save the Visit</button>
+    <button type="button" id="btn-clear">Clear Visit Form</button>
+    <button type="button" id="btn-delete">Delete Visit</button>
+  </div>
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+</div>
+<script src="/static/js/visit_fields.js"></script>
+<script src="/static/js/visits.js"></script>
+{% endblock %}

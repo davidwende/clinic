@@ -9,8 +9,13 @@ from datetime import time  # Import the datetime module
 file_name = "my_database.sqlite"
 # Define the SQLite database
 
+# CLINIC_DB_TYPE lets a process (e.g. html_server, during local dev/testing)
+# target sqlite without editing the checked-in Config/config.toml, which
+# normally points production installs at the shared mysql instance.
+db_type = os.environ.get("CLINIC_DB_TYPE", connection['type'])
+
 db = Database()
-if connection['type'] == "sqlite":
+if db_type == "sqlite":
     print("===> sqlite")
     db.bind("sqlite", file_name, create_db=True)
 
@@ -438,25 +443,34 @@ class Tests(db.Entity):
 class BloodPulse(db.Entity):
     visit = Required(Visits)
     time = Required(time)
-    pulse = Optional(int, size=8)
-    systolic = Optional(int, size=8)
-    diastolic = Optional(int, size=8)
+    # unsigned=True: none of these are ever negative, and check_blood
+    # (Blood/blood.py) validates systolic up to 254 -- a plain signed
+    # size=8 int only goes to 127. Unsigned size=8 (TINYINT UNSIGNED on
+    # MySQL) covers 0-255, which fits systolic/diastolic/pulse's real
+    # thresholds. NOTE: this only affects freshly created tables --
+    # config.toml's mysql connection runs with create="no" (check_tables
+    # only verifies columns exist by name, not their type), so the
+    # production table's actual column type isn't changed by this alone;
+    # it needs an ALTER TABLE to actually take effect there.
+    pulse = Optional(int, size=8, unsigned=True)
+    systolic = Optional(int, size=8, unsigned=True)
+    diastolic = Optional(int, size=8, unsigned=True)
     PrimaryKey(visit, time)
 
 
-if connection['type'] == "mysql":
+if db_type == "mysql":
     # following line is for AWS
     # db.bind(provider='mysql', host=host['ip'], user='dowende', passwd='', db='clinic2')
 
     # following line is for local mysql server (dietpi)
     db.bind(provider='mysql', host=host['ip'], user='david', passwd='osnat123', db='clinic')
-    
+
     # db.bind(provider='mysql', host=host['ip'], user='osnat', passwd='wende123', db='clinic')
     if connection['create'] == 'yes':
         db.generate_mapping(create_tables=True, check_tables=True)
     else:
         db.generate_mapping(create_tables=False, check_tables=True)
-if connection['type'] == 'sqlite':
+if db_type == 'sqlite':
     db.generate_mapping(create_tables=True)
 
 

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Diagnoses / Procedures / Patients{% endblock %}
+{% block content %}
+<div class="diagproc-page">
+  <p class="back-link"><a href="/patients">&larr; Back to Patients</a></p>
+  <h2>Diagnoses / Procedures / Patients</h2>
+  <p id="form-message" class="form-message"></p>
+
+  <div class="diagproc-columns">
+    <fieldset class="visit-group diagproc-col">
+      <legend>Diagnoses</legend>
+      <input type="text" id="diag-filter" placeholder="Filter diagnoses..." autocomplete="off">
+      <ul class="diagproc-list" id="diag-list"></ul>
+    </fieldset>
+
+    <fieldset class="visit-group diagproc-col">
+      <legend>Procedures</legend>
+      <input type="text" id="proc-filter" placeholder="Filter procedures..." autocomplete="off">
+      <ul class="diagproc-list" id="proc-list"></ul>
+    </fieldset>
+
+    <fieldset class="visit-group diagproc-col">
+      <legend>Patients</legend>
+      <ul class="diagproc-list" id="patient-list"></ul>
+    </fieldset>
+  </div>
+</div>
+<script src="/static/js/diag_proc.js"></script>
+{% endblock %}
