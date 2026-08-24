@@ -5,12 +5,14 @@
   <section class="patient-list-pane">
     <input type="text" id="search" placeholder="Enter search string" autocomplete="off">
     <div class="list-meta">Total: <strong id="total-count">0</strong></div>
-    <table id="patient-table">
-      <thead>
-        <tr><th>Visits</th><th>ID</th><th>First Name</th><th>Surname</th></tr>
-      </thead>
-      <tbody id="patient-rows"></tbody>
-    </table>
+    <div class="patient-list-scroll">
+      <table id="patient-table">
+        <thead>
+          <tr><th>Visits</th><th>ID</th><th>First Name</th><th>Surname</th></tr>
+        </thead>
+        <tbody id="patient-rows"></tbody>
+      </table>
+    </div>
 
     <fieldset class="date-range">
       <legend>Visit summary</legend>

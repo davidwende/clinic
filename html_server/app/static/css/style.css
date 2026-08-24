@@ -79,11 +79,28 @@ button:hover { background: var(--accent); color: white; }
 
 .list-meta { margin: 0.5rem 0; font-size: 0.9rem; opacity: 0.8; }
 
+/* Caps the patient list at roughly a screen height (minus room for the
+   search box / Visit summary panel around it) so a large patient count
+   scrolls within its own pane instead of pushing Visit summary down the
+   page. */
+.patient-list-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 #patient-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 #patient-table th, #patient-table td {
   text-align: left;
   padding: 0.3rem 0.4rem;
   border-bottom: 1px solid var(--bg-alt);
+}
+#patient-table thead th {
+  position: sticky;
+  top: 0;
+  background: Canvas;
+  z-index: 1;
 }
 #patient-rows tr { cursor: pointer; }
 #patient-rows tr:hover { background: var(--bg-alt); }

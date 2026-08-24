@@ -100,7 +100,11 @@
     fillForm(p);
     els.label.textContent = `${p.tz}   ${p.fname} ${p.surname}`;
     showMessage("");
-    [...els.rows.children].forEach((tr) => tr.classList.toggle("selected", tr.dataset.tz === tz));
+    [...els.rows.children].forEach((tr) => {
+      const isSelected = tr.dataset.tz === tz;
+      tr.classList.toggle("selected", isSelected);
+      if (isSelected) tr.scrollIntoView({ block: "nearest" });
+    });
   }
 
   function fillForm(p) {

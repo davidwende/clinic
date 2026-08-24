@@ -41,6 +41,15 @@ def set_user_password(username: str, password: str, role: str = "user") -> None:
     _save(users)
 
 
+def set_user_role(username: str, role: str) -> bool:
+    users = _load()
+    if username not in users:
+        return False
+    users[username]["role"] = role
+    _save(users)
+    return True
+
+
 def delete_user(username: str) -> bool:
     users = _load()
     if username not in users:

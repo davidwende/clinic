@@ -1,7 +1,12 @@
 # html_server dependencies. Install into an environment that also has this
-# repo's existing deps available (pony, tomli, pyisemail) since app/db.py
-# imports the shared Database package — e.g. reuse ../venv and add these on
-# top of it, or create a fresh venv with -r ../pyproject.toml deps too.
+# repo's existing deps available (pony, tomli, pyisemail, and pymysql if
+# Config/config.toml points at mysql) since app/db.py imports the shared
+# Database package -- e.g. reuse ../venv and add these on top of it, or
+# create a fresh venv with -r ../pyproject.toml deps too.
+pony>=0.7.17
+tomli>=2.0
+pyisemail>=2.0
+pymysql>=1.1  # only needed when Config/config.toml's [connection] type = "mysql"
 fastapi>=0.115
 uvicorn[standard]>=0.30
 jinja2>=3.1

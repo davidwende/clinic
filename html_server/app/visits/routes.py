@@ -203,7 +203,14 @@ def get_visit_report(tz: str, visit_date: datetime.date):
         report = Report(tz, visit_date, surname, fname)
         html = report_header + report.get_string() + report_tail
     for filename in REPORT_IMAGES:
-        html = html.replace(f"file://{REPO_ROOT / filename}", f"/report-assets/{filename}")
+        # Match by filename only, not the full file:// path -- Config/config.toml
+        # hardcodes an absolute path from the machine it was authored on
+        # (file:///home/dwende/repo/clinic/...), which is *not* REPO_ROOT on any
+        # other deployment (e.g. /home/dietpi/clinic on the Pi). A literal
+        # f"file://{REPO_ROOT / filename}" match only ever worked by coincidence
+        # on the original dev machine; matching solely on the trailing filename
+        # works regardless of where the server (or config.toml's author) lives.
+        html = re.sub(rf'file://\S*/{re.escape(filename)}', f"/report-assets/{filename}", html)
     # The page <title> is what browsers suggest as the filename for
     # "Save as PDF" in the print dialog -- there's no other way to hint a
     # default filename there. Config/config.toml's header hardcodes a
