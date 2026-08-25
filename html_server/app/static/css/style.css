@@ -255,6 +255,11 @@ textarea {
   min-width: 160px;
 }
 .field-text input, .field-textarea textarea { padding: 0.3rem 0.4rem; }
+/* "Description of Pain" (the only field-textarea) -- take the full row
+   width in its flex-wrap group instead of the default narrow textarea. */
+.field-textarea { flex-basis: 100%; }
+.field-textarea label { width: 100%; }
+.field-textarea textarea { width: 100%; }
 .field-checkbox { flex-wrap: wrap; }
 .field-checkbox > .checkbox-label { flex-direction: row; white-space: nowrap; }
 
@@ -271,7 +276,7 @@ input.child-field { width: 8rem; padding: 0.25rem 0.4rem; }
 .radio-inline { display: flex; align-items: center; gap: 0.25rem; }
 .radio-inline label { font-weight: normal; white-space: nowrap; }
 
-.big-textarea { width: 100%; min-height: 400px; }
+.big-textarea { width: 100%; min-height: 100px; }
 
 .visit-actions { margin-top: 1rem; }
 

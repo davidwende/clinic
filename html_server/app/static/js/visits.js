@@ -369,14 +369,23 @@
     document.getElementById("pane-" + id).scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // Clinical workflow order requested separately from field/DB order (which
+  // stays whatever field_lists.py / VISIT_TABS declare -- this only reorders
+  // the tab bar and the on-page section order, not the underlying data).
+  const TAB_ORDER = [
+    "cc", "exam", "back", "hip", "neck", "shoulder", "knee_ankle",
+    "tests", "diagnoses", "procedures", "recommend", "summary",
+  ];
+
   function renderTabs() {
-    const allTabs = [
-      ...VISIT_TABS.map((t) => ({ id: t.id, label: t.label, kind: "grouped", data: t })),
-      ...VISIT_TEXT_TABS.map((t) => ({ id: t.id, label: t.label, kind: "text", data: t })),
-      { id: "procedures", label: "Procedures", kind: "procedures" },
-      { id: "diagnoses", label: "Diagnoses", kind: "diagnoses" },
-      { id: "summary", label: "Summary", kind: "summary" },
-    ];
+    const tabsById = new Map([
+      ...VISIT_TABS.map((t) => [t.id, { id: t.id, label: t.label, kind: "grouped", data: t }]),
+      ...VISIT_TEXT_TABS.map((t) => [t.id, { id: t.id, label: t.label, kind: "text", data: t }]),
+      ["procedures", { id: "procedures", label: "Procedures", kind: "procedures" }],
+      ["diagnoses", { id: "diagnoses", label: "Diagnoses", kind: "diagnoses" }],
+      ["summary", { id: "summary", label: "Summary", kind: "summary" }],
+    ]);
+    const allTabs = TAB_ORDER.map((id) => tabsById.get(id));
 
     for (const tab of allTabs) {
       const btn = document.createElement("button");
@@ -408,7 +417,7 @@
         }
       } else if (tab.kind === "text") {
         const ta = document.createElement("textarea");
-        ta.rows = 22;
+        ta.rows = 6;
         ta.className = "big-textarea";
         pane.appendChild(ta);
         registry[tab.data.name] = { kind: "textarea", get: () => ta.value, set: (v) => { ta.value = v || ""; } };
