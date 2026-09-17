@@ -4,7 +4,9 @@
 // not auto-generated, so the terminology matches what the Qt app shows.
 //
 // Each field descriptor is one of:
-//   {type:"text", name, label}
+//   {type:"text", name, label, maxLength?, wide?}  -- maxLength caps input
+//     length (mirrors the DB column's Optional(str, N) where relevant);
+//     wide spans the full row width instead of the default narrow box
 //   {type:"textarea", name, label}
 //   {type:"checkbox", name, label, children:[...]}  -- children are
 //     disabled+reset when this checkbox is unchecked, enabled when checked
@@ -21,7 +23,7 @@ const VISIT_TABS = [
     id: "cc", label: "Current Complaint",
     groups: [
       { title: "General", fields: [
-        { type: "text", name: "cc_onset", label: "Onset of Pain" },
+        { type: "text", name: "cc_onset", label: "Onset of Pain", maxLength: 100, wide: true },
         { type: "textarea", name: "cc_description", label: "Description of Pain" },
       ]},
       { title: "Aggravating Factors", fields: [

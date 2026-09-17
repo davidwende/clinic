@@ -260,6 +260,12 @@ textarea {
 .field-textarea { flex-basis: 100%; }
 .field-textarea label { width: 100%; }
 .field-textarea textarea { width: 100%; }
+
+/* Any field flagged wide:true in visit_fields.js (e.g. "Onset of Pain") --
+   same full-row treatment as field-textarea, for text inputs. */
+.field-wide { flex-basis: 100%; }
+.field-wide label { width: 100%; }
+.field-wide input { width: 100%; }
 .field-checkbox { flex-wrap: wrap; }
 .field-checkbox > .checkbox-label { flex-direction: row; white-space: nowrap; }
 

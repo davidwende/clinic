@@ -125,12 +125,14 @@
   function renderField(container, field) {
     const wrap = document.createElement("div");
     wrap.className = "field field-" + field.type;
+    if (field.wide) wrap.classList.add("field-wide");
 
     if (field.type === "text" || field.type === "textarea") {
       const label = document.createElement("label");
       if (field.label) label.textContent = field.label;
       const input = document.createElement(field.type === "textarea" ? "textarea" : "input");
       if (field.type === "text") input.type = "text";
+      if (field.maxLength) input.maxLength = field.maxLength;
       label.appendChild(input);
       wrap.appendChild(label);
       registry[field.name] = { kind: field.type, get: () => input.value, set: (v) => { input.value = v || ""; } };
