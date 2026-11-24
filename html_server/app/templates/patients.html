@@ -66,7 +66,22 @@
         <button type="button" id="btn-diag-proc">Diagnoses / Procedures</button>
       </div>
     </form>
+
+    {% if user.role == "admin" %}
+    <fieldset class="db-admin">
+      <legend>Database (admin)</legend>
+      <p class="db-admin-note">Backup downloads the complete database (structure and all data) as a text file.
+        Restore <strong>replaces the entire database</strong> with the contents of a backup file.</p>
+      <div class="button-row">
+        <button type="button" id="btn-db-backup">Backup Database</button>
+        <button type="button" id="btn-db-restore" class="danger-button">Restore Database…</button>
+        <input type="file" id="db-restore-file" accept=".sql,.txt,text/plain" hidden>
+      </div>
+      <p id="db-admin-message" class="form-message"></p>
+    </fieldset>
+    {% endif %}
   </section>
 </div>
 <script src="/static/js/patients.js"></script>
+{% if user.role == "admin" %}<script src="/static/js/db_admin.js"></script>{% endif %}
 {% endblock %}

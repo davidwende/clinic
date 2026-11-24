@@ -22,3 +22,11 @@ def require_login_api(request: Request) -> dict:
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     return user
+
+
+def require_admin_api(request: Request) -> dict:
+    """Dependency for admin-only JSON API routes (e.g. database restore)."""
+    user = require_login_api(request)
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Administrator access required")
+    return user

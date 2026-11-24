@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.admin.routes import api_router as admin_api_router
 from app.auth.routes import router as auth_router
 from app.blood.routes import api_router as blood_api_router
 from app.blood.routes import page_router as blood_page_router
@@ -62,6 +63,7 @@ app.include_router(blood_page_router)
 app.include_router(blood_api_router)
 app.include_router(diag_proc_page_router)
 app.include_router(diag_proc_api_router)
+app.include_router(admin_api_router)
 
 
 @app.get("/")
