@@ -7,7 +7,7 @@
 //   {type:"text", name, label, maxLength?, wide?}  -- maxLength caps input
 //     length (mirrors the DB column's Optional(str, N) where relevant);
 //     wide spans the full row width instead of the default narrow box
-//   {type:"textarea", name, label}
+//   {type:"textarea", name, label, maxLength?}
 //   {type:"checkbox", name, label, children:[...]}  -- children are
 //     disabled+reset when this checkbox is unchecked, enabled when checked
 //     (equivalent of Qt's checkboxPairs / onCheckboxStateChanged pattern)
@@ -24,21 +24,21 @@ const VISIT_TABS = [
     groups: [
       { title: "General", fields: [
         { type: "text", name: "cc_onset", label: "Onset of Pain", maxLength: 100, wide: true },
-        { type: "textarea", name: "cc_description", label: "Description of Pain" },
+        { type: "textarea", name: "cc_description", label: "Description of Pain", maxLength: 2000 },
       ]},
       { title: "Aggravating Factors", fields: [
         { type: "checkbox", name: "cc_walking", label: "Walking", children: [
-          { type: "text", name: "cc_walking_le", label: "" }] },
+          { type: "text", name: "cc_walking_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "cc_standing", label: "Standing", children: [
-          { type: "text", name: "cc_standing_le", label: "" }] },
+          { type: "text", name: "cc_standing_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "cc_sitting", label: "Sitting", children: [
-          { type: "text", name: "cc_sitting_le", label: "" }] },
+          { type: "text", name: "cc_sitting_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "cc_lying", label: "Lying", children: [
-          { type: "text", name: "cc_lying_le", label: "" }] },
+          { type: "text", name: "cc_lying_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "cc_lifting", label: "Lifting", children: [
-          { type: "text", name: "cc_lifting_le", label: "" }] },
+          { type: "text", name: "cc_lifting_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "cc_shoulder_move", label: "Shoulder Movement", children: [
-          { type: "text", name: "cc_shoulder_move_le", label: "" }] },
+          { type: "text", name: "cc_shoulder_move_le", label: "", maxLength: 50 }] },
       ]},
       { title: "Location", fields: [
         { type: "checkbox", name: "cc_loc_neck", label: "Neck" },
@@ -55,8 +55,8 @@ const VISIT_TABS = [
         { type: "checkbox", name: "cc_loc_ankle_l", label: "Ankle, L" },
         { type: "checkbox", name: "cc_loc_ankle_r", label: "Ankle, R" },
         { type: "checkbox", name: "cc_loc_other", label: "Other" },
-        { type: "text", name: "cc_loc_radiates_le", label: "Radiates" },
-        { type: "text", name: "cc_loc_precise_le", label: "Precise Location" },
+        { type: "text", name: "cc_loc_radiates_le", label: "Radiates", maxLength: 100 },
+        { type: "text", name: "cc_loc_precise_le", label: "Precise Location", maxLength: 100 },
       ]},
     ],
   },
@@ -64,13 +64,13 @@ const VISIT_TABS = [
     id: "back", label: "Back",
     groups: [
       { title: "Examinations", fields: [
-        { type: "text", name: "back_movement_le", label: "Movement" },
+        { type: "text", name: "back_movement_le", label: "Movement", maxLength: 100 },
         { type: "checkbox", name: "back_trend_l", label: "Trendelenberg, L", children: [
           { type: "checkbox", name: "back_trend_l_pos", label: "+ve" }] },
         { type: "checkbox", name: "back_trend_r", label: "Trendelenberg, R", children: [
           { type: "checkbox", name: "back_trend_r_pos", label: "+ve" }] },
-        { type: "text", name: "back_slr_l_le", label: "SLR, L" },
-        { type: "text", name: "back_slr_r_le", label: "SLR, R" },
+        { type: "text", name: "back_slr_l_le", label: "SLR, L", maxLength: 49 },
+        { type: "text", name: "back_slr_r_le", label: "SLR, R", maxLength: 49 },
         { type: "checkbox", name: "back_fst_l", label: "FST, L", children: [
           { type: "checkbox", name: "back_fst_l_pos", label: "+ve" }] },
         { type: "checkbox", name: "back_fst_r", label: "FST, R", children: [
@@ -89,13 +89,13 @@ const VISIT_TABS = [
           { type: "checkbox", name: "back_fabere_r_pos", label: "+ve" }] },
         { type: "checkbox", name: "back_sensation", label: "Sensation", children: [
           { type: "checkbox", name: "back_sensation_equals", label: "L==R?" },
-          { type: "text", name: "back_sensation_le", label: "" }] },
+          { type: "text", name: "back_sensation_le", label: "", maxLength: 49 }] },
         { type: "checkbox", name: "back_power", label: "Power", children: [
           { type: "checkbox", name: "back_power_equals", label: "L==R?" },
-          { type: "text", name: "back_power_le", label: "" }] },
+          { type: "text", name: "back_power_le", label: "", maxLength: 49 }] },
         { type: "checkbox", name: "back_reflexes", label: "Reflexes", children: [
           { type: "checkbox", name: "back_reflexes_equals", label: "L==R?" },
-          { type: "text", name: "back_reflexes_le", label: "" }] },
+          { type: "text", name: "back_reflexes_le", label: "", maxLength: 49 }] },
       ]},
       { title: "Resisted Hip", fields: [
         { type: "checkbox", name: "back_abduction_l", label: "Abduction, L", children: [
@@ -114,14 +114,14 @@ const VISIT_TABS = [
           { type: "checkbox", name: "back_flexion_l_pos", label: "+ve" }] },
         { type: "checkbox", name: "back_flexion_r", label: "Flexion, R", children: [
           { type: "checkbox", name: "back_flexion_r_pos", label: "+ve" }] },
-        { type: "text", name: "back_tenderness_le", label: "Tenderness" },
+        { type: "text", name: "back_tenderness_le", label: "Tenderness", maxLength: 99 },
       ]},
       { title: "Thoracic Spine", fields: [
         { type: "checkbox", name: "back_tspine_rot_l", label: "Thoracic Spine Rot L", children: [
           { type: "checkbox", name: "back_tspine_rot_l_pain", label: "Painful" }] },
         { type: "checkbox", name: "back_tspine_rot_r", label: "Thoracic Spine Rot R", children: [
           { type: "checkbox", name: "back_tspine_rot_r_pain", label: "Painful" }] },
-        { type: "text", name: "back_tspine_tender_le", label: "Tenderness" },
+        { type: "text", name: "back_tspine_tender_le", label: "Tenderness", maxLength: 100 },
       ]},
     ],
   },
@@ -138,12 +138,12 @@ const VISIT_TABS = [
           { type: "checkbox", name: "hip_trend_r_pos", label: "+ve" }] },
       ]},
       { title: "Hip Passive", fields: [
-        { type: "text", name: "hip_passive_lat_rot_l_le", label: "Lateral Rotation, L" },
-        { type: "text", name: "hip_passive_lat_rot_r_le", label: "Lateral Rotation, R" },
-        { type: "text", name: "hip_passive_medial_rot_l_le", label: "Medial Rotation, L" },
-        { type: "text", name: "hip_passive_medial_rot_r_le", label: "Medial Rotation, R" },
-        { type: "text", name: "hip_passive_flexion_l_le", label: "Flexion, L" },
-        { type: "text", name: "hip_passive_flexion_r_le", label: "Flexion, R" },
+        { type: "text", name: "hip_passive_lat_rot_l_le", label: "Lateral Rotation, L", maxLength: 50 },
+        { type: "text", name: "hip_passive_lat_rot_r_le", label: "Lateral Rotation, R", maxLength: 50 },
+        { type: "text", name: "hip_passive_medial_rot_l_le", label: "Medial Rotation, L", maxLength: 50 },
+        { type: "text", name: "hip_passive_medial_rot_r_le", label: "Medial Rotation, R", maxLength: 50 },
+        { type: "text", name: "hip_passive_flexion_l_le", label: "Flexion, L", maxLength: 50 },
+        { type: "text", name: "hip_passive_flexion_r_le", label: "Flexion, R", maxLength: 50 },
       ]},
       { title: "Hip Resisted", fields: [
         { type: "checkbox", name: "hip_resisted_abd_l", label: "Abduction, L", children: [
@@ -164,8 +164,8 @@ const VISIT_TABS = [
           { type: "checkbox", name: "hip_resisted_adduction_r_limit", label: "Painful" }] },
       ]},
       { title: "Hip Other", fields: [
-        { type: "text", name: "hip_tenderness", label: "Tenderness" },
-        { type: "text", name: "hip_other", label: "Other" },
+        { type: "text", name: "hip_tenderness", label: "Tenderness", maxLength: 100 },
+        { type: "text", name: "hip_other", label: "Other", maxLength: 50 },
       ]},
     ],
   },
@@ -173,10 +173,10 @@ const VISIT_TABS = [
     id: "neck", label: "Neck",
     groups: [
       { title: "Neck Examinations", fields: [
-        { type: "text", name: "neck_extension_le", label: "Extension" },
-        { type: "text", name: "neck_rotation_l_le", label: "Rotation, L" },
-        { type: "text", name: "neck_rotation_r_le", label: "Rotation, R" },
-        { type: "text", name: "neck_cranial_le", label: "Cranial Nerve" },
+        { type: "text", name: "neck_extension_le", label: "Extension", maxLength: 50 },
+        { type: "text", name: "neck_rotation_l_le", label: "Rotation, L", maxLength: 50 },
+        { type: "text", name: "neck_rotation_r_le", label: "Rotation, R", maxLength: 50 },
+        { type: "text", name: "neck_cranial_le", label: "Cranial Nerve", maxLength: 50 },
         { type: "checkbox", name: "neck_sensation", label: "Sensation", children: [
           { type: "checkbox", name: "neck_sensation_equals", label: "L==R" },
           { type: "text", name: "neck_sensation_le", label: "" }] },
@@ -186,8 +186,8 @@ const VISIT_TABS = [
         { type: "checkbox", name: "neck_reflexes", label: "Reflexes", children: [
           { type: "checkbox", name: "neck_reflexes_equals", label: "L==R" },
           { type: "text", name: "neck_reflexes_le", label: "" }] },
-        { type: "text", name: "neck_tenderness_le", label: "Tenderness" },
-        { type: "text", name: "neck_other_le", label: "Other" },
+        { type: "text", name: "neck_tenderness_le", label: "Tenderness", maxLength: 100 },
+        { type: "text", name: "neck_other_le", label: "Other", maxLength: 100 },
       ]},
     ],
   },
@@ -197,20 +197,20 @@ const VISIT_TABS = [
       { title: "Scapular Motion", fields: [
         { type: "checkbox", name: "shoulder_align_l", label: "Alignment, L", children: [
           { type: "checkbox", name: "shoulder_align_l_ab", label: "Abnormal" },
-          { type: "text", name: "shoulder_align_l_le", label: "" }] },
+          { type: "text", name: "shoulder_align_l_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "shoulder_align_r", label: "Alignment, R", children: [
           { type: "checkbox", name: "shoulder_align_r_ab", label: "Abnormal" },
-          { type: "text", name: "shoulder_align_r_le", label: "" }] },
+          { type: "text", name: "shoulder_align_r_le", label: "", maxLength: 50 }] },
         { type: "checkbox", name: "shoulder_rom_l", label: "ROM, L", children: [
           { type: "radio_bool", name: "shoulder_rom_l_full", trueLabel: "Full", falseLabel: "Limited" }] },
         { type: "checkbox", name: "shoulder_rom_r", label: "ROM, R", children: [
           { type: "radio_bool", name: "shoulder_rom_r_full", trueLabel: "Full", falseLabel: "Limited" }] },
       ]},
       { title: "Passive Shoulder Motion", fields: [
-        { type: "text", name: "shoulder_passive_abduction_l_le", label: "Abduction, L" },
-        { type: "text", name: "shoulder_passive_abduction_r_le", label: "Abduction, R" },
-        { type: "text", name: "shoulder_passive_lat_rot_l_le", label: "Lat. Rotation, L" },
-        { type: "text", name: "shoulder_passive_lat_rot_r_le", label: "Lat. Rotation, R" },
+        { type: "text", name: "shoulder_passive_abduction_l_le", label: "Abduction, L", maxLength: 50 },
+        { type: "text", name: "shoulder_passive_abduction_r_le", label: "Abduction, R", maxLength: 50 },
+        { type: "text", name: "shoulder_passive_lat_rot_l_le", label: "Lat. Rotation, L", maxLength: 50 },
+        { type: "text", name: "shoulder_passive_lat_rot_r_le", label: "Lat. Rotation, R", maxLength: 50 },
         { type: "checkbox", name: "shoulder_passive_med_rot_l", label: "Med. Rotation, L", children: [
           { type: "checkbox", name: "shoulder_passive_med_rot_l_limit", label: "Limited" },
           { type: "checkbox", name: "shoulder_passive_med_rot_l_pain", label: "Painful" }] },
@@ -225,10 +225,10 @@ const VISIT_TABS = [
           { type: "checkbox", name: "shoulder_passive_adduction_r_pain", label: "Painful" }] },
       ]},
       { title: "Resisted Shoulder Motion", fields: [
-        { type: "text", name: "shoulder_resisted_abduction_l_le", label: "Abduction, L" },
-        { type: "text", name: "shoulder_resisted_abduction_r_le", label: "Abduction, R" },
-        { type: "text", name: "shoulder_resisted_lat_rot_l_le", label: "Lat. Rotation, L" },
-        { type: "text", name: "shoulder_resisted_lat_rot_r_le", label: "Lat. Rotation, R" },
+        { type: "text", name: "shoulder_resisted_abduction_l_le", label: "Abduction, L", maxLength: 49 },
+        { type: "text", name: "shoulder_resisted_abduction_r_le", label: "Abduction, R", maxLength: 49 },
+        { type: "text", name: "shoulder_resisted_lat_rot_l_le", label: "Lat. Rotation, L", maxLength: 49 },
+        { type: "text", name: "shoulder_resisted_lat_rot_r_le", label: "Lat. Rotation, R", maxLength: 49 },
         { type: "checkbox", name: "shoulder_resisted_med_rot_l", label: "Med. Rotation, L", children: [
           { type: "checkbox", name: "shoulder_resisted_med_rot_l_limit", label: "Painful" }] },
         { type: "checkbox", name: "shoulder_resisted_med_rot_r", label: "Med. Rotation, R", children: [
@@ -254,10 +254,10 @@ const VISIT_TABS = [
           { type: "checkbox", name: "knee_scar_r_yes", label: "+ve" }] },
         { type: "checkbox", name: "knee_align_l", label: "Alignment, L", children: [
           { type: "checkbox", name: "knee_align_l_ab", label: "Abnormal" },
-          { type: "text", name: "knee_align_l_le", label: "" }] },
+          { type: "text", name: "knee_align_l_le", label: "", maxLength: 49 }] },
         { type: "checkbox", name: "knee_align_r", label: "Alignment, R", children: [
           { type: "checkbox", name: "knee_align_r_ab", label: "Abnormal" },
-          { type: "text", name: "knee_align_r_le", label: "" }] },
+          { type: "text", name: "knee_align_r_le", label: "", maxLength: 49 }] },
         { type: "checkbox", name: "knee_muscle_l", label: "Muscle Wasting, L", children: [
           { type: "checkbox", name: "knee_muscle_l_yes", label: "+ve" }] },
         { type: "checkbox", name: "knee_muscle_r", label: "Muscle Wasting, R", children: [
@@ -282,8 +282,8 @@ const VISIT_TABS = [
           { type: "checkbox", name: "knee_grind_l_pos", label: "+ve" }] },
         { type: "checkbox", name: "knee_grind_r", label: "Patelofemoral Grinding, R", children: [
           { type: "checkbox", name: "knee_grind_r_pos", label: "+ve" }] },
-        { type: "text", name: "knee_rom_l", label: "ROM, L" },
-        { type: "text", name: "knee_rom_r", label: "ROM, R" },
+        { type: "text", name: "knee_rom_l", label: "ROM, L", maxLength: 50 },
+        { type: "text", name: "knee_rom_r", label: "ROM, R", maxLength: 50 },
         { type: "checkbox", name: "knee_mcl_l", label: "MCL, L", children: [
           { type: "checkbox", name: "knee_mcl_lax_l", label: "Lax." }] },
         { type: "checkbox", name: "knee_mcl_r", label: "MCL, R", children: [
@@ -292,9 +292,9 @@ const VISIT_TABS = [
           { type: "checkbox", name: "knee_lcl_lax_l", label: "Lax." }] },
         { type: "checkbox", name: "knee_lcl_r", label: "LCL, R", children: [
           { type: "checkbox", name: "knee_lcl_lax_r", label: "Lax." }] },
-        { type: "text", name: "knee_tender_l_le", label: "Tenderness L" },
-        { type: "text", name: "knee_tender_r_le", label: "Tenderness R" },
-        { type: "text", name: "knee_other_le", label: "Other" },
+        { type: "text", name: "knee_tender_l_le", label: "Tenderness L", maxLength: 99 },
+        { type: "text", name: "knee_tender_r_le", label: "Tenderness R", maxLength: 99 },
+        { type: "text", name: "knee_other_le", label: "Other", maxLength: 99 },
       ]},
       { title: "Ankle Joint", fields: [
         { type: "checkbox", name: "ankle_scar_l", label: "Scarring Ankle, L", children: [
@@ -305,16 +305,16 @@ const VISIT_TABS = [
           { type: "radio_bool", name: "ankle_align_l_pronated", trueLabel: "Pronated", falseLabel: "Supinated" }] },
         { type: "checkbox", name: "ankle_align_r", label: "Alignment R", children: [
           { type: "radio_bool", name: "ankle_align_r_pronated", trueLabel: "Pronated", falseLabel: "Supinated" }] },
-        { type: "text", name: "ankle_dors_l_le", label: "Dorsflexion L" },
-        { type: "text", name: "ankle_dors_r_le", label: "Dorsflexion R" },
-        { type: "text", name: "ankle_plant_l_le", label: "Plantarflexion L" },
-        { type: "text", name: "ankle_plant_r_le", label: "Plantarflexion R" },
-        { type: "text", name: "ankle_inversion_l_le", label: "Inversion L" },
-        { type: "text", name: "ankle_inversion_r_le", label: "Inversion R" },
-        { type: "text", name: "ankle_eversion_l_le", label: "Eversion L" },
-        { type: "text", name: "ankle_eversion_r_le", label: "Eversion R" },
-        { type: "text", name: "ankle_tender_le_l", label: "Tender L" },
-        { type: "text", name: "ankle_tender_le_r", label: "Tender R" },
+        { type: "text", name: "ankle_dors_l_le", label: "Dorsflexion L", maxLength: 49 },
+        { type: "text", name: "ankle_dors_r_le", label: "Dorsflexion R", maxLength: 49 },
+        { type: "text", name: "ankle_plant_l_le", label: "Plantarflexion L", maxLength: 49 },
+        { type: "text", name: "ankle_plant_r_le", label: "Plantarflexion R", maxLength: 49 },
+        { type: "text", name: "ankle_inversion_l_le", label: "Inversion L", maxLength: 49 },
+        { type: "text", name: "ankle_inversion_r_le", label: "Inversion R", maxLength: 49 },
+        { type: "text", name: "ankle_eversion_l_le", label: "Eversion L", maxLength: 49 },
+        { type: "text", name: "ankle_eversion_r_le", label: "Eversion R", maxLength: 49 },
+        { type: "text", name: "ankle_tender_le_l", label: "Tender L", maxLength: 99 },
+        { type: "text", name: "ankle_tender_le_r", label: "Tender R", maxLength: 99 },
       ]},
       { title: "Ankle Subtalar", fields: [
         { type: "checkbox", name: "anklest_addpain_l", label: "Adduction Painful, L", children: [
@@ -341,7 +341,7 @@ const VISIT_TABS = [
 // Full-width single-textarea tabs, handled separately from VISIT_TABS in
 // visits.js (each maps to one top-level VisitIn/VisitOut string field).
 const VISIT_TEXT_TABS = [
-  { id: "exam", label: "Examination", name: "examination" },
-  { id: "tests", label: "Tests", name: "tests" },
-  { id: "recommend", label: "Recommendations", name: "recommendation" },
+  { id: "exam", label: "Examination", name: "examination", maxLength: 10000 },
+  { id: "tests", label: "Tests", name: "tests", maxLength: 10000 },
+  { id: "recommend", label: "Recommendations", name: "recommendation", maxLength: 2000 },
 ];

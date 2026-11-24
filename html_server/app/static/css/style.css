@@ -382,3 +382,13 @@ input.child-field { width: 8rem; padding: 0.25rem 0.4rem; }
 }
 .leave-modal-box p { margin: 0 0 1rem; }
 .leave-modal-box .button-row { margin-top: 0; }
+
+/* Visit save result dialog (reuses the leave-modal overlay/box) */
+.save-result-box { max-width: 34rem; max-height: 85vh; overflow-y: auto; border-width: 2px; }
+.save-result-box.save-ok { border-color: #2e7d32; }
+.save-result-box.save-failed { border-color: var(--error); }
+.save-result-title { margin: 0 0 0.75rem; }
+.save-ok .save-result-title { color: #2e7d32; }
+.save-failed .save-result-title { color: var(--error); }
+.save-result-items { margin: 0 0 1rem; padding-left: 1.25rem; font-size: 0.9rem; }
+.save-result-box a { color: var(--accent); }

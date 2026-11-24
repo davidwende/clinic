@@ -39,6 +39,31 @@
     els.message.className = "form-message" + (kind ? " " + kind : "");
   }
 
+  // field name -> { label: "Tab > Group > Field", tabId } -- used to point
+  // save errors / verification warnings at the right place on the form.
+  const fieldInfo = {};
+  function buildFieldInfo() {
+    const add = (name, parts, tabId) => {
+      fieldInfo[name] = { label: parts.filter(Boolean).join(" \u203a "), tabId };
+    };
+    for (const tab of VISIT_TABS) {
+      for (const group of tab.groups) {
+        for (const field of group.fields) {
+          add(field.name, [tab.label, group.title, field.label], tab.id);
+          for (const child of field.children || []) {
+            add(child.name, [tab.label, group.title, field.label, child.label], tab.id);
+          }
+        }
+      }
+    }
+    for (const tab of VISIT_TEXT_TABS) add(tab.name, [tab.label], tab.id);
+    add("procedures", ["Procedures"], "procedures");
+    add("diagnoses", ["Diagnoses"], "diagnoses");
+  }
+  function fieldLabel(name) {
+    return (fieldInfo[name] && fieldInfo[name].label) || name;
+  }
+
   async function apiFetch(url, options) {
     const res = await fetch(url, options);
     if (res.status === 401) {
@@ -66,6 +91,7 @@
       input.type = "text";
       input.className = "child-field";
       if (field.label) input.placeholder = field.label;
+      if (field.maxLength) input.maxLength = field.maxLength;
       container.appendChild(input);
       registry[field.name] = { kind: "text", get: () => input.value, set: (v) => { input.value = v || ""; } };
       return { setEnabled: (e) => { input.disabled = !e; }, reset: () => { input.value = ""; } };
@@ -194,6 +220,7 @@
     addInput.type = "text";
     addInput.placeholder = isProc ? "Procedure name" : "Diagnosis name";
     addInput.className = "picker-add-input";
+    addInput.maxLength = 50; // Procedures.procedure / Diagnoses.diagnosis are str(50)
 
     const addBtn = document.createElement("button");
     addBtn.type = "button";
@@ -421,6 +448,7 @@
         const ta = document.createElement("textarea");
         ta.rows = 6;
         ta.className = "big-textarea";
+        if (tab.data.maxLength) ta.maxLength = tab.data.maxLength;
         pane.appendChild(ta);
         registry[tab.data.name] = { kind: "textarea", get: () => ta.value, set: (v) => { ta.value = v || ""; } };
       } else if (tab.kind === "summary") {
@@ -646,27 +674,233 @@
     }
   });
 
-  // Returns true on a successful save, false otherwise -- resolveLeaveIntent
-  // uses that to decide whether it's safe to proceed with leaving.
+  // Modal result dialog for Save. The inline #form-message sits at the very
+  // top of a long page, so after scrolling down and clicking Save it was
+  // usually off-screen -- a modal can't be missed. Resolves when dismissed.
+  function showSaveResultDialog({ ok, title, message, items = [], gotoTabId = null, extra = null }) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement("div");
+      overlay.className = "leave-modal-overlay";
+      const box = document.createElement("div");
+      box.className = "leave-modal-box save-result-box " + (ok ? "save-ok" : "save-failed");
+      box.setAttribute("role", "alertdialog");
+
+      const h = document.createElement("h3");
+      h.className = "save-result-title";
+      h.textContent = (ok ? "\u2714 " : "\u2716 ") + title;
+      box.appendChild(h);
+
+      const p = document.createElement("p");
+      p.textContent = message;
+      box.appendChild(p);
+
+      if (items.length) {
+        const ul = document.createElement("ul");
+        ul.className = "save-result-items";
+        for (const text of items) {
+          const li = document.createElement("li");
+          li.textContent = text;
+          ul.appendChild(li);
+        }
+        box.appendChild(ul);
+      }
+      if (extra) box.appendChild(extra);
+
+      const row = document.createElement("div");
+      row.className = "button-row";
+      const finish = () => { overlay.remove(); document.removeEventListener("keydown", onKey); resolve(); };
+      const onKey = (e) => { if (e.key === "Escape" || e.key === "Enter") { e.preventDefault(); finish(); } };
+      if (gotoTabId) {
+        const btnGo = document.createElement("button");
+        btnGo.type = "button";
+        btnGo.textContent = "Show me the field";
+        btnGo.addEventListener("click", () => { finish(); scrollToTab(gotoTabId); });
+        row.appendChild(btnGo);
+      }
+      const btnOk = document.createElement("button");
+      btnOk.type = "button";
+      btnOk.textContent = "OK";
+      btnOk.addEventListener("click", finish);
+      row.appendChild(btnOk);
+      box.appendChild(row);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      document.addEventListener("keydown", onKey);
+      btnOk.focus();
+    });
+  }
+
+  // Turns a non-2xx save response into {message, field}. The server sends a
+  // structured {reason, message, field} detail for save failures, but older
+  // paths (404 patient-not-found, FastAPI's own 422 body validation, a proxy
+  // error page) send other shapes, so all of them are handled.
+  async function describeSaveError(res) {
+    const payload = await res.json().catch(() => null);
+    const d = payload && payload.detail;
+    if (d && typeof d === "object" && !Array.isArray(d) && d.message) {
+      return { message: d.message, field: d.field || null };
+    }
+    if (typeof d === "string") return { message: `${d} The visit was NOT saved.`, field: null };
+    if (Array.isArray(d)) {
+      const parts = d.map((e) => {
+        const loc = (e.loc || []).filter((x) => x !== "body");
+        return `${loc.length ? fieldLabel(loc[0]) : "Request"}: ${e.msg}`;
+      });
+      const first = d[0] && (d[0].loc || []).filter((x) => x !== "body")[0];
+      return {
+        message: `The server rejected some of the values (${parts.join("; ")}). The visit was NOT saved.`,
+        field: first || null,
+      };
+    }
+    return {
+      message: `The server returned an error (HTTP ${res.status}${res.statusText ? " " + res.statusText : ""}). The visit was NOT saved.`,
+      field: null,
+    };
+  }
+
+  // Compares what was sent with what the server read back from the database
+  // after committing, so "saved" means "verified stored", and anything the
+  // DB layer silently changed (save_visit truncates some text to 49/99
+  // characters) is reported rather than lost quietly.
+  function compareSaved(sent, saved) {
+    const diffs = [];
+    for (const [name, entry] of Object.entries(registry)) {
+      let a = sent[name];
+      let b = saved[name];
+      if (entry.kind === "checkbox" || entry.kind === "radio_bool") {
+        if (!!a === !!b) continue;
+        diffs.push(`${fieldLabel(name)}: was ${a ? "ticked" : "unticked"}, stored as ${b ? "ticked" : "unticked"}`);
+        continue;
+      }
+      a = String(a ?? "");
+      b = String(b ?? "");
+      if (a === b) continue;
+      if (a.startsWith(b)) {
+        diffs.push(`${fieldLabel(name)}: shortened from ${a.length} to ${b.length} characters`);
+      } else {
+        diffs.push(`${fieldLabel(name)}: stored differently from what was entered`);
+      }
+    }
+    for (const kind of ["procedures", "diagnoses"]) {
+      const sentMap = sent[kind] || {};
+      const savedMap = saved[kind] || {};
+      const noun = kind === "procedures" ? "Procedure" : "Diagnosis";
+      for (const key of Object.keys(sentMap)) {
+        if (!(key in savedMap)) diffs.push(`${noun} "${key}" is missing from the saved visit`);
+        else if (String(sentMap[key] ?? "") !== String(savedMap[key] ?? "")) diffs.push(`${noun} "${key}": details stored differently`);
+      }
+      for (const key of Object.keys(savedMap)) {
+        if (!(key in sentMap)) diffs.push(`${noun} "${key}" is in the saved visit but was not on the form`);
+      }
+    }
+    return diffs;
+  }
+
+  function setSaving(saving) {
+    for (const btn of [els.btnSave, els.btnSaveTop]) {
+      if (!btn) continue;
+      if (saving) {
+        btn.dataset.label = btn.textContent;
+        btn.textContent = "Saving\u2026";
+        btn.disabled = true;
+      } else {
+        btn.textContent = btn.dataset.label || btn.textContent;
+        btn.disabled = currentDate !== todayISO;
+      }
+    }
+  }
+
+  async function saveFailed(message, { field = null, extra = null } = {}) {
+    showMessage("Visit NOT saved: " + message, "error");
+    const where = field && fieldInfo[field];
+    await showSaveResultDialog({
+      ok: false,
+      title: "Visit NOT saved",
+      message,
+      items: where ? [`Field: ${where.label}`] : [],
+      gotoTabId: where ? where.tabId : null,
+      extra,
+    });
+    return false;
+  }
+
+  // Returns true on a verified successful save, false otherwise --
+  // resolveLeaveIntent uses that to decide whether it's safe to leave.
   async function saveVisit({ skipConfirm = false } = {}) {
     if (currentDate !== todayISO) return false;
     if (!skipConfirm && !confirm(`You requested to save this visit data from ${currentDate}`)) return false;
     const body = gatherFormData();
-    const res = await apiFetch(`/api/patients/${encodeURIComponent(tz)}/visits/${currentDate}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      loadIntoForm(data);
-      updateDateBadge(false);
-      showMessage("Visit saved OK", "success");
-      return true;
+    const savedDate = currentDate;
+
+    let res;
+    setSaving(true);
+    try {
+      // Plain fetch, not apiFetch: apiFetch redirects to /login on a 401,
+      // which here would throw away every unsaved entry on the form.
+      res = await fetch(`/api/patients/${encodeURIComponent(tz)}/visits/${savedDate}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch (err) {
+      return saveFailed(
+        "Could not reach the clinic web server (the network connection may be down, or the server is not running). " +
+        "The visit was NOT saved. Your entries are still on screen -- try again once the connection is back."
+      );
+    } finally {
+      setSaving(false);
     }
-    const payload = await res.json().catch(() => ({}));
-    showMessage(typeof payload.detail === "string" ? payload.detail : "Could not save visit data.", "error");
-    return false;
+
+    if (res.status === 401) {
+      const extra = document.createElement("p");
+      const a = document.createElement("a");
+      a.href = "/login";
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Open the login page in a new tab";
+      extra.appendChild(a);
+      return saveFailed(
+        "Your login session has expired, so the server refused the save. The visit was NOT saved. " +
+        "Your entries are still on screen: log in again in a new tab, then come back to this tab and click Save again.",
+        { extra }
+      );
+    }
+    if (!res.ok) {
+      const { message, field } = await describeSaveError(res);
+      return saveFailed(message, { field });
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) {
+      return saveFailed(
+        "The server answered, but its reply could not be read, so the save could not be confirmed. " +
+        "Reopen this visit to check whether it was stored before re-entering anything."
+      );
+    }
+
+    const diffs = compareSaved(body, data);
+    loadIntoForm(data);
+    updateDateBadge(false);
+    const time = new Date().toLocaleTimeString();
+    const procCount = Object.keys(data.procedures || {}).length;
+    const diagCount = Object.keys(data.diagnoses || {}).length;
+    const summary =
+      `The visit of ${savedDate} was saved at ${time} and read back from the database to confirm it ` +
+      `(${diagCount} diagnos${diagCount === 1 ? "is" : "es"}, ${procCount} procedure${procCount === 1 ? "" : "s"}).`;
+    if (diffs.length) {
+      showMessage(`Visit saved at ${time}, but ${diffs.length} field(s) were stored differently -- see details.`, "error");
+      await showSaveResultDialog({
+        ok: true,
+        title: "Visit saved -- with changes",
+        message: summary + " Some values were stored differently from what was entered (the form now shows the stored values):",
+        items: diffs,
+      });
+    } else {
+      showMessage(`Visit saved and verified at ${time}`, "success");
+      await showSaveResultDialog({ ok: true, title: "Visit saved", message: summary });
+    }
+    return true;
   }
 
   els.btnSave.addEventListener("click", () => saveVisit());
@@ -692,6 +926,7 @@
   // --- Init ----------------------------------------------------------------
 
   renderTabs();
+  buildFieldInfo();
   els.btnSaveTop.addEventListener("click", () => saveVisit());
   loadLibraries();
   loadDates();
